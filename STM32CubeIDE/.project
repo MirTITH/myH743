@@ -102,6 +102,16 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_mdma.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_pcd.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_pcd_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pcd_ex.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_pwr.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_pwr.c</locationURI>
@@ -162,6 +172,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_ll_usb.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c</locationURI>
+		</link>
+		<link>
 			<name>Middlewares/FreeRTOS/cmsis_os.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</locationURI>
@@ -212,6 +227,26 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/timers.c</locationURI>
 		</link>
 		<link>
+			<name>Middlewares/USB_Device_Library/usbd_cdc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/USB_Device_Library/usbd_core.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/USB_Device_Library/usbd_ctlreq.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/USB_Device_Library/usbd_ioreq.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/Core/fmc.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/fmc.c</locationURI>
@@ -255,6 +290,26 @@
 			<name>Application/User/Core/usart.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/usart.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/USB_DEVICE/App/usb_device.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usb_device.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/USB_DEVICE/App/usbd_cdc_if.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usbd_cdc_if.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/USB_DEVICE/App/usbd_desc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usbd_desc.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/USB_DEVICE/Target/usbd_conf.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/Target/usbd_conf.c</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

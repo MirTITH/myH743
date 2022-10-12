@@ -8,7 +8,8 @@
     "Core",
     "Drivers",
     "Middlewares",
-    "STM32CubeIDE"
+    "STM32CubeIDE",
+    "USB_DEVICE"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
