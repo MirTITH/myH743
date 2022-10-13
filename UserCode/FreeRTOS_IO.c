@@ -1,95 +1,126 @@
 /**
- * @file io_retargetToUart.c
+ * @file FreeRTOS_IO.c
  * @author X. Y.
- * @brief io 重定向，支持输入和输出（注意不能在中断中使用）
+ * @brief FreeRTOS IO 重定向
  * @version 0.1
  * @date 2022-10-12
  *
  * @copyright Copyright (c) 2022
  *
  */
-#include "io_retargetToUSB.h"
+#include "FreeRTOS_IO.h"
 #include "string.h"
+#include "cmsis_os.h"
+
+#define USE_USB -1 // 不要改这行
+
+/****************
+ * 以下是待配置内容
+ ****************/
+
+#include "usart.h"
 #include "usbd_cdc_if.h"
 
-// 串口号配置
-// 注：仅 GCC 编译器支持 stderr 和 stdout 指定不同串口，ARMCC 编译器的 stderr 和 stdout 都使用 stdout_huart 输出。
-// static UART_HandleTypeDef *stdout_huart = &huart1;
-// static UART_HandleTypeDef *stderr_huart = &huart1;
-// static UART_HandleTypeDef *stdin_huart  = &huart1;
+/**
+ * IO 流重定向目标
+ *
+ */
 
-#ifdef IORETARGET_USE_RTOS
-#include "cmsis_os.h"
-#endif
-
-#if (defined IORETARGET_STDIN_BUFFER_SIZE) && (IORETARGET_STDIN_BUFFER_SIZE > 0)
-static IO_BufferQueue_t stdinBufferQueue = {
-    .start = 0,
-    .end = 0,
-    .total_size = IORETARGET_STDIN_BUFFER_SIZE};
-
-void IORetarget_Uart_Receive_IT()
-{
-    HAL_UART_Receive_IT(stdin_huart, (uint8_t *)&stdinBufferQueue.buffer[stdinBufferQueue.end], 1);
-}
-
-void IORetarget_Uart_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (huart == stdin_huart) {
-        stdinBufferQueue.end++;
-        if (stdinBufferQueue.end >= stdinBufferQueue.total_size) stdinBufferQueue.end = 0;
-        while (HAL_UART_Receive_IT(stdin_huart, (uint8_t *)&stdinBufferQueue.buffer[stdinBufferQueue.end], 1) == HAL_BUSY) {
-            // 接收大量数据时，有概率发生 Overrun 错误，串口一直处于忙状态
-            // 以下代码可以清除该状态
-            __HAL_UART_CLEAR_OREFLAG(huart);
-            huart->RxState = HAL_UART_STATE_READY;
-            __HAL_UNLOCK(huart);
-        }
-    }
-}
-
-static int IORetarget_ReadStr(IO_BufferQueue_t *bufferQueue, char *pBuffer, int size)
-{
-    while (bufferQueue->start == bufferQueue->end) {
-#ifdef IORETARGET_USE_RTOS
-        osThreadYield();
-#endif // IORETARGET_USE_RTOS
-    }
-
-    for (int i = 0; i < size; i++) {
-        if (bufferQueue->start != bufferQueue->end) {
-            *pBuffer = bufferQueue->buffer[bufferQueue->start++];
-            pBuffer++;
-            if (bufferQueue->start >= stdinBufferQueue.total_size) {
-                stdinBufferQueue.start = 0;
-            }
-        } else {
-            return i;
-        }
-    }
-    return size;
-}
-
-#endif // (defined IORETARGET_STDIN_BUFFER_SIZE) && (IORETARGET_STDIN_BUFFER_SIZE > 0)
-
-static void IORetarget_WriteStr(const uint8_t *str, uint16_t size)
-{
-    while (CDC_Transmit_FS((uint8_t *)str, size) == USBD_BUSY) {
-#ifdef IORETARGET_USE_RTOS
-        osThreadYield();
-#endif // IORETARGET_USE_RTOS
-    }
-}
+#define IO_STDOUT USE_USB
+#define IO_STDERR USE_USB
+#define IO_STDIN  USE_USB
 
 /**
- * @brief 从串口外设读取 1 个字符
+ * 缓冲区设置
  *
- * @param huart
- * @return char
  */
-char IORetarget_ReadChar()
+
+#define IO_STDIN_BufferSize 128
+
+/****************
+ * 以上是待配置内容
+ ****************/
+
+#define _IO_USE_STDIN_Buffer ((defined IO_STDIN) && (IO_STDIN_BufferSize > 0))
+
+#if _IO_USE_STDIN_Buffer
+static QueueHandle_t StdinQueue = NULL;
+#endif
+
+/* Determine whether we are in thread mode or handler mode. */
+static int inHandlerMode(void)
 {
-    return 0;
+    return __get_IPSR() != 0;
+}
+
+void FreeRTOS_IO_Init()
+{
+#if _IO_USE_STDIN_Buffer
+    StdinQueue = xQueueCreate(IO_STDIN_BufferSize, sizeof(char));
+#endif
+}
+
+static int FreeRTOS_IO_WriteToSTDOUT(char *pBuffer, int size)
+{
+#ifdef IO_STDOUT
+#if (IO_STDOUT == USE_USB)
+    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
+        taskYIELD();
+    }
+    return size;
+#else
+
+#endif
+#endif
+}
+
+static int FreeRTOS_IO_WriteToSTDERR(char *pBuffer, int size)
+{
+#ifdef IO_STDERR
+#if (IO_STDERR == USE_USB)
+    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
+        taskYIELD();
+    }
+    return size;
+#else
+
+#endif
+#endif
+}
+
+static int FreeRTOS_IO_ReadFromSTDIN(char *pBuffer, int size)
+{
+#ifdef IO_STDIN
+#if (IO_STDIN == USE_USB)
+#if _IO_USE_STDIN_Buffer
+    int receivedSize = 0;
+    if (inHandlerMode()) {
+        BaseType_t pxHigherPriorityTaskWoken = 0;
+        ;
+        while (receivedSize < size) {
+            if (xQueueReceiveFromISR(StdinQueue, pBuffer, &pxHigherPriorityTaskWoken) == pdFALSE) {
+                return receivedSize;
+            }
+            pBuffer++;
+            receivedSize++;
+        }
+    } else {
+        while (receivedSize < size) {
+            if (xQueueReceive(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE) {
+                return receivedSize;
+            }
+            pBuffer++;
+            receivedSize++;
+        }
+    }
+    return receivedSize;
+#else
+#error You must use stdin buffer when using USB for stdin.
+#endif
+#else
+
+#endif
+#endif
 }
 
 // 判断是哪个编译器。GCC 会定义 __GNUC__，ARMCCv5 会定义 __ARMCC_VERSION，ARMCCv6 会定义 __GNUC__ 和 __ARMCC_VERSION
@@ -110,12 +141,13 @@ char IORetarget_ReadChar()
  */
 __attribute__((used)) int _write(int fd, char *pBuffer, int size)
 {
+    // return IO_Write(fd, (uint8_t *)pBuffer, size);
     switch (fd) {
         case STDOUT_FILENO: // 标准输出流
-            IORetarget_WriteStr((uint8_t *)pBuffer, size);
+            return FreeRTOS_IO_WriteToSTDOUT(pBuffer, size);
             break;
         case STDERR_FILENO: // 标准错误流
-            IORetarget_WriteStr((uint8_t *)pBuffer, size);
+            return FreeRTOS_IO_WriteToSTDERR(pBuffer, size);
             break;
         default:
             // EBADF, which means the file descriptor is invalid or the file isn't opened for writing;
@@ -141,14 +173,8 @@ __attribute__((used)) int _read(int fd, char *pBuffer, int size)
 
     switch (fd) {
         case STDIN_FILENO:
-#if (defined IORETARGET_STDIN_BUFFER_SIZE) && (IORETARGET_STDIN_BUFFER_SIZE > 0)
-            return IORetarget_ReadStr(&stdinBufferQueue, pBuffer, size);
-#else
-            *pBuffer = IORetarget_ReadChar();
-            return 1;
-#endif
+            return FreeRTOS_IO_ReadFromSTDIN(pBuffer, size);
             break;
-
         default:
             // EBADF, which means the file descriptor is invalid or the file isn't opened for writing;
             errno = EBADF;
