@@ -9,7 +9,9 @@
     "Drivers",
     "Middlewares",
     "STM32CubeIDE",
-    "USB_DEVICE"
+    "USB_DEVICE",
+    "LIBJPEG",
+    "Utilities"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",
