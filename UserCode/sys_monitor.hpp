@@ -10,6 +10,6 @@ public:
     SysMonitor(const char *threadName = "SysMonitor", osPriority priority = osPriorityNormal, uint32_t stacksize = 256);
     ~SysMonitor();
 private:
-    osThreadDef_t thread_def;
-    osThreadId thread_id;
+    osThreadDef_t thread_def = {0};
+    osThreadId thread_id = {0};
 };
