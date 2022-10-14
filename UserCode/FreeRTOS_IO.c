@@ -64,9 +64,10 @@ static int FreeRTOS_IO_WriteToSTDOUT(char *pBuffer, int size)
 {
 #ifdef IO_STDOUT
 #if (IO_STDOUT == USE_USB)
-    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
-        taskYIELD();
-    }
+    CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
+    // while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
+    //     taskYIELD();
+    // }
     return size;
 #else
 

@@ -27,7 +27,9 @@ void StartDefaultTask(void const *argument)
 
     for (;;) {
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        cout << sys_monitor.temperature << endl;
+        cout << sys_monitor.temperature;
+        cout << "," << sys_monitor.loop_time;
+        cout << endl;
         osDelay(200);
     }
 }

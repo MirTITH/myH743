@@ -29,13 +29,16 @@ static void SysMonitor_Entry(void const *argument)
     auto this_monitor = (SysMonitor *)argument;
     uint32_t adc3_value = 0;
 
+    uint32_t start_tick = 0;
+
     for (;;) {
+        start_tick = osKernelSysTick();
         HAL_ADC_Start(&hadc3);
-        if (HAL_ADC_PollForConversion(&hadc3, 100) == HAL_OK) {
+        if (HAL_ADC_PollForConversion(&hadc3, 1000) == HAL_OK) {
             adc3_value = HAL_ADC_GetValue(&hadc3);
         }
         this_monitor->temperature = CalcTemperature(3300, adc3_value, ADC_RESOLUTION_16B);
-
+        this_monitor->loop_time = (osKernelSysTick() - start_tick) * configTICK_RATE_HZ / 1000;
         osDelay(100);
     }
 }
