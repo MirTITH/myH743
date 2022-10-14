@@ -1,5 +1,4 @@
 #include "user_main.hpp"
-#include "main.h"
 #include "cmsis_os.h"
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
@@ -7,8 +6,14 @@
 #include <iostream>
 #include "adc.h"
 #include "sys_monitor.hpp"
+#include "bsp_driver_sd.h"
 
 using namespace std;
+
+uint8_t BSP_SD_IsDetected(void)
+{
+    return SD_NOT_PRESENT;
+}
 
 void StartDefaultTask(void const *argument)
 {

@@ -11,7 +11,8 @@
     "STM32CubeIDE",
     "USB_DEVICE",
     "LIBJPEG",
-    "Utilities"
+    "Utilities",
+    "FATFS"
   ],
   "virtualFolder": {
     "name": "<virtual_root>",

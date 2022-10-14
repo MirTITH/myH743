@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
+#include "fatfs.h"
 #include "i2c.h"
 #include "i2s.h"
 #include "jpeg.h"
@@ -121,6 +122,7 @@ int main(void)
   MX_JPEG_Init();
   MX_LIBJPEG_Init();
   MX_SDMMC1_SD_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
