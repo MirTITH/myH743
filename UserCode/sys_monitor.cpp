@@ -1,9 +1,5 @@
 #include "sys_monitor.hpp"
-#include "cmsis_os.h"
-#include "main.h"
 #include "adc.h"
-
-SysMonitorInfo_t SysMonitorInfo;
 
 /**
  * @brief 计算内部温度传感器的温度
@@ -28,10 +24,9 @@ static float CalcTemperature(uint16_t vref, uint32_t adcValue, uint32_t adcResol
            TEMPSENSOR_CAL1_TEMP;
 }
 
-void SysMonitor_Entry(void const *argument)
+static void SysMonitor_Entry(void const *argument)
 {
-    (void)argument;
-
+    auto this_monitor = (SysMonitor *)argument;
     uint32_t adc3_value = 0;
 
     for (;;) {
@@ -39,21 +34,22 @@ void SysMonitor_Entry(void const *argument)
         if (HAL_ADC_PollForConversion(&hadc3, 100) == HAL_OK) {
             adc3_value = HAL_ADC_GetValue(&hadc3);
         }
-        SysMonitorInfo.core_temp = CalcTemperature(3300, adc3_value, ADC_RESOLUTION_16B);
-
-        std::cout << "\tHAL:" << __HAL_ADC_CALC_TEMPERATURE(3300, adc3_value, ADC_RESOLUTION_16B) << std::endl;
+        this_monitor->temperature = CalcTemperature(3300, adc3_value, ADC_RESOLUTION_16B);
 
         osDelay(100);
     }
 }
 
-void SysMonitor_Start()
+SysMonitor::SysMonitor(const char *threadName, osPriority priority, uint32_t stacksize)
 {
-    osThreadDef_t sysMonitorThreadDef = {
-        .name = (char *)"SysMonitor",
-        .pthread = SysMonitor_Entry,
-        .tpriority = osPriorityNormal,
-        .stacksize = 256};
+    thread_def.name = (char *)threadName;
+    thread_def.pthread = SysMonitor_Entry;
+    thread_def.tpriority = priority;
+    thread_def.stacksize = stacksize;
 
-    osThreadCreate(&sysMonitorThreadDef, NULL);
+    thread_id = osThreadCreate(&thread_def, this);
+}
+
+SysMonitor::~SysMonitor()
+{
 }

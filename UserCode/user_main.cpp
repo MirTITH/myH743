@@ -18,11 +18,11 @@ void StartDefaultTask(void const *argument)
 
     HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
 
-    SysMonitor_Start();
+    SysMonitor sys_monitor;
 
     for (;;) {
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        cout << SysMonitorInfo.core_temp << endl;
+        cout << sys_monitor.temperature << endl;
         osDelay(200);
     }
 }

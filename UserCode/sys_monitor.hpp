@@ -1,17 +1,14 @@
 #pragma once
+#include "cmsis_os.h"
+#include "main.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef struct {
-    float core_temp;
-} SysMonitorInfo_t;
-
-extern SysMonitorInfo_t SysMonitorInfo;
-
-void SysMonitor_Start();
-
-#ifdef __cplusplus
-}
-#endif
+class SysMonitor
+{
+public:
+    float temperature;
+    SysMonitor(const char *threadName = "SysMonitor", osPriority priority = osPriorityNormal, uint32_t stacksize = 256);
+    ~SysMonitor();
+private:
+    osThreadDef_t thread_def;
+    osThreadId thread_id;
+};

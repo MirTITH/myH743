@@ -1,5 +1,5 @@
 /**
- * @file FreeRTOS_IO.c
+ * @file freertos_io.c
  * @author X. Y.
  * @brief FreeRTOS IO 重定向
  * @version 0.1
@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2022
  *
  */
-#include "FreeRTOS_IO.h"
+#include "freertos_io.h"
 #include "string.h"
 #include "cmsis_os.h"
 
@@ -48,7 +48,7 @@ static QueueHandle_t StdinQueue = NULL;
 #endif
 
 /* Determine whether we are in thread mode or handler mode. */
-static int inHandlerMode(void)
+static int InHandlerMode(void)
 {
     return __get_IPSR() != 0;
 }
@@ -94,7 +94,7 @@ static int FreeRTOS_IO_ReadFromSTDIN(char *pBuffer, int size)
 #if (IO_STDIN == USE_USB)
 #if _IO_USE_STDIN_Buffer
     int receivedSize = 0;
-    if (inHandlerMode()) {
+    if (InHandlerMode()) {
         BaseType_t pxHigherPriorityTaskWoken = 0;
         ;
         while (receivedSize < size) {
