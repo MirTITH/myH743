@@ -6,6 +6,7 @@
 #include "sys_monitor.hpp"
 #include "bsp_driver_sd.h"
 #include "freertos_io.h"
+#include "stdio_CLI.h"
 
 using namespace std;
 
@@ -22,19 +23,15 @@ void StartDefaultTask(void const *argument)
 
     MX_USB_DEVICE_Init();
 
-    auto &sys_monitor = SysMonitor::GetInstance();
+    CLI_Start();
+
+    // auto &sys_monitor = SysMonitor::GetInstance();
 
     string str;
 
     for (;;) {
-        cin >> str;
-        cout << "received:" << str << endl;
-        // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         // cout << sys_monitor << endl;
-        // cout << sys_monitor.GetInfo().temperature << ",";
-        // cout << sys_monitor.GetInfo().vbat << ",";
-        // cout << sys_monitor.GetInfo().vrefint;
-        // cout << endl;
-        // osDelay(500);
+        osDelay(500);
     }
 }
