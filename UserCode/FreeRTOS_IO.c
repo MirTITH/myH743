@@ -11,6 +11,7 @@
 #include "freertos_io.h"
 #include "string.h"
 #include "cmsis_os.h"
+#include "in_handle_mode.h"
 
 #define USE_USB -1 // 不要改这行
 
@@ -41,21 +42,17 @@
  * 以上是待配置内容
  ****************/
 
-#define _IO_USE_STDIN_Buffer ((defined IO_STDIN) && (IO_STDIN_BufferSize > 0))
+#if (defined IO_STDIN) && (IO_STDIN_BufferSize > 0)
+#define _IO_USE_STDIN_Buffer
+#endif
 
-#if _IO_USE_STDIN_Buffer
+#ifdef _IO_USE_STDIN_Buffer
 static QueueHandle_t StdinQueue = NULL;
 #endif
 
-/* Determine whether we are in thread mode or handler mode. */
-static int InHandlerMode(void)
-{
-    return __get_IPSR() != 0;
-}
-
 void FreeRTOS_IO_Init()
 {
-#if _IO_USE_STDIN_Buffer
+#ifdef _IO_USE_STDIN_Buffer
     StdinQueue = xQueueCreate(IO_STDIN_BufferSize, sizeof(char));
 #endif
 }
@@ -64,10 +61,10 @@ static int FreeRTOS_IO_WriteToSTDOUT(char *pBuffer, int size)
 {
 #ifdef IO_STDOUT
 #if (IO_STDOUT == USE_USB)
-    CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
-    // while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
-    //     taskYIELD();
-    // }
+    // CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
+    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
+        taskYIELD();
+    }
     return size;
 #else
 
@@ -91,30 +88,53 @@ static int FreeRTOS_IO_WriteToSTDERR(char *pBuffer, int size)
 
 static int FreeRTOS_IO_ReadFromSTDIN(char *pBuffer, int size)
 {
-#ifdef IO_STDIN
-#if (IO_STDIN == USE_USB)
-#if _IO_USE_STDIN_Buffer
-    int receivedSize = 0;
+    int received_size = 0;
     if (InHandlerMode()) {
-        BaseType_t pxHigherPriorityTaskWoken = 0;
-        ;
-        while (receivedSize < size) {
-            if (xQueueReceiveFromISR(StdinQueue, pBuffer, &pxHigherPriorityTaskWoken) == pdFALSE) {
-                return receivedSize;
-            }
+        BaseType_t xTaskWokenByReceive = pdFALSE;
+        while (received_size < size) {
+            if (xQueueReceiveFromISR(StdinQueue, pBuffer, &xTaskWokenByReceive) == pdFALSE)
+                break;
             pBuffer++;
-            receivedSize++;
+            received_size++;
+        }
+        if (xTaskWokenByReceive != pdFALSE) {
+            taskYIELD();
         }
     } else {
-        while (receivedSize < size) {
-            if (xQueueReceive(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE) {
-                return receivedSize;
-            }
+        while (received_size < size) {
+            if (xQueueReceive(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE)
+                break;
             pBuffer++;
-            receivedSize++;
+            received_size++;
         }
     }
-    return receivedSize;
+    return received_size;
+}
+
+void FreeRTOS_IO_RxCallback(char *pBuffer, int size)
+{
+#ifdef IO_STDIN
+#if (IO_STDIN == USE_USB)
+#ifdef _IO_USE_STDIN_Buffer
+    if (InHandlerMode()) {
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        while (size > 0) {
+            if (xQueueSendFromISR(StdinQueue, pBuffer, &xHigherPriorityTaskWoken) == pdFALSE)
+                break;
+            pBuffer++;
+            size--;
+        }
+        if (xHigherPriorityTaskWoken != pdFALSE) {
+            taskYIELD();
+        }
+    } else {
+        while (size > 0) {
+            if (xQueueSend(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE)
+                break;
+            pBuffer++;
+            size--;
+        }
+    }
 #else
 #error You must use stdin buffer when using USB for stdin.
 #endif
@@ -174,7 +194,7 @@ __attribute__((used)) int _read(int fd, char *pBuffer, int size)
 
     switch (fd) {
         case STDIN_FILENO:
-            return FreeRTOS_IO_ReadFromSTDIN(pBuffer, size);
+            return FreeRTOS_IO_ReadFromSTDIN(pBuffer, 1);
             break;
         default:
             // EBADF, which means the file descriptor is invalid or the file isn't opened for writing;

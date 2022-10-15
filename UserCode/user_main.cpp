@@ -1,12 +1,11 @@
 #include "user_main.hpp"
 #include "cmsis_os.h"
 #include "usb_device.h"
-#include "usbd_cdc_if.h"
-#include "string.h"
+#include <string>
 #include <iostream>
-#include "adc.h"
 #include "sys_monitor.hpp"
 #include "bsp_driver_sd.h"
+#include "freertos_io.h"
 
 using namespace std;
 
@@ -19,17 +18,23 @@ void StartDefaultTask(void const *argument)
 {
     (void)argument;
 
+    FreeRTOS_IO_Init();
+
     MX_USB_DEVICE_Init();
 
-    HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
+    auto &sys_monitor = SysMonitor::GetInstance();
 
-    SysMonitor sys_monitor;
+    string str;
 
     for (;;) {
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        cout << sys_monitor.temperature;
-        cout << "," << sys_monitor.loop_time;
-        cout << endl;
-        osDelay(200);
+        cin >> str;
+        cout << "received:" << str << endl;
+        // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        // cout << sys_monitor << endl;
+        // cout << sys_monitor.GetInfo().temperature << ",";
+        // cout << sys_monitor.GetInfo().vbat << ",";
+        // cout << sys_monitor.GetInfo().vrefint;
+        // cout << endl;
+        // osDelay(500);
     }
 }
