@@ -19,40 +19,39 @@
  * 以下是待配置内容
  ****************/
 
-#include "usart.h"
+// #include "usart.h"
 #include "usbd_cdc_if.h"
 
-/**
- * IO 流重定向目标
- *
- */
+// IO 流重定向目标
 
 #define IO_STDOUT USE_USB
 #define IO_STDERR USE_USB
 #define IO_STDIN  USE_USB
 
-/**
- * 缓冲区设置
- *
- */
+// 缓冲区设置
 
 #define IO_STDIN_BufferSize 128
+
+// 超时时间设置
+
+static TickType_t MAX_TX_BLOCK_TICK = 10;            // 发送的最大阻塞时间 (ms)
+static TickType_t MAX_RX_BLOCK_TICK = portMAX_DELAY; // 接收的最大阻塞时间 (ms)
+static TickType_t MAX_CALLBACK_BLOCK_TICK = 10;      // 回调函数的最大阻塞时间（在中断中调用一定不会阻塞） (ms)
 
 /****************
  * 以上是待配置内容
  ****************/
 
-#if (defined IO_STDIN) && (IO_STDIN_BufferSize > 0)
-#define _IO_USE_STDIN_Buffer
-#endif
+/* Stores the handle of the task that will be notified when the transmission is complete. */
+static TaskHandle_t xTaskToNotify = NULL;
 
-#ifdef _IO_USE_STDIN_Buffer
+#ifdef IO_STDIN
 static QueueHandle_t StdinQueue = NULL;
 #endif
 
 void FreeRTOS_IO_Init()
 {
-#ifdef _IO_USE_STDIN_Buffer
+#ifdef IO_STDIN
     StdinQueue = xQueueCreate(IO_STDIN_BufferSize, sizeof(char));
 #endif
 }
@@ -61,10 +60,19 @@ static int FreeRTOS_IO_WriteToSTDOUT(char *pBuffer, int size)
 {
 #ifdef IO_STDOUT
 #if (IO_STDOUT == USE_USB)
-    // CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
-    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
-        taskYIELD();
-    }
+    /* At this point xTaskToNotify should be NULL as no transmission
+        is in progress.  A mutex can be used to guard access to the
+        peripheral if necessary. */
+    configASSERT(xTaskToNotify == NULL);
+
+    /* Store the handle of the calling task. */
+    xTaskToNotify = xTaskGetCurrentTaskHandle();
+
+    /* Start the transmission - an interrupt is generated when the
+    transmission is complete. */
+    CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
+    ulTaskNotifyTake(pdTRUE, MAX_TX_BLOCK_TICK);
+    xTaskToNotify = NULL;
     return size;
 #else
 
@@ -77,7 +85,7 @@ static int FreeRTOS_IO_WriteToSTDERR(char *pBuffer, int size)
 #ifdef IO_STDERR
 #if (IO_STDERR == USE_USB)
     while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
-        taskYIELD();
+        portYIELD();
     }
     return size;
 #else
@@ -88,6 +96,7 @@ static int FreeRTOS_IO_WriteToSTDERR(char *pBuffer, int size)
 
 static int FreeRTOS_IO_ReadFromSTDIN(char *pBuffer, int size)
 {
+#ifdef IO_STDIN
     int received_size = 0;
     if (InHandlerMode()) {
         BaseType_t xTaskWokenByReceive = pdFALSE;
@@ -97,25 +106,41 @@ static int FreeRTOS_IO_ReadFromSTDIN(char *pBuffer, int size)
             pBuffer++;
             received_size++;
         }
-        if (xTaskWokenByReceive != pdFALSE) {
-            taskYIELD();
-        }
+        portYIELD_FROM_ISR(xTaskWokenByReceive);
     } else {
         while (received_size < size) {
-            if (xQueueReceive(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE)
+            if (xQueueReceive(StdinQueue, pBuffer, MAX_RX_BLOCK_TICK) == pdFALSE)
                 break;
             pBuffer++;
             received_size++;
         }
     }
     return received_size;
+#else
+    return 0;
+#endif
+}
+
+void FreeRTOS_IO_TxCpltCallback()
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if (xTaskToNotify != NULL) {
+        /* Notify the task that the transmission is complete. */
+        if (InHandlerMode()) {
+            vTaskNotifyGiveFromISR(xTaskToNotify, &xHigherPriorityTaskWoken);
+            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        } else {
+            xTaskNotifyGive(xTaskToNotify);
+        }
+        /* There are no transmissions in progress, so no tasks to notify. */
+        xTaskToNotify = NULL;
+    }
 }
 
 void FreeRTOS_IO_RxCallback(char *pBuffer, int size)
 {
 #ifdef IO_STDIN
-#if (IO_STDIN == USE_USB)
-#ifdef _IO_USE_STDIN_Buffer
     if (InHandlerMode()) {
         BaseType_t xHigherPriorityTaskWoken = pdFALSE;
         while (size > 0) {
@@ -124,23 +149,15 @@ void FreeRTOS_IO_RxCallback(char *pBuffer, int size)
             pBuffer++;
             size--;
         }
-        if (xHigherPriorityTaskWoken != pdFALSE) {
-            taskYIELD();
-        }
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     } else {
         while (size > 0) {
-            if (xQueueSend(StdinQueue, pBuffer, portMAX_DELAY) == pdFALSE)
+            if (xQueueSend(StdinQueue, pBuffer, MAX_CALLBACK_BLOCK_TICK) == pdFALSE)
                 break;
             pBuffer++;
             size--;
         }
     }
-#else
-#error You must use stdin buffer when using USB for stdin.
-#endif
-#else
-
-#endif
 #endif
 }
 

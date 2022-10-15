@@ -15,6 +15,7 @@ extern "C" {
 #endif
 void FreeRTOS_IO_Init();
 void FreeRTOS_IO_RxCallback(char *pBuffer, int size);
+void FreeRTOS_IO_TxCpltCallback();
 
 #ifdef __cplusplus
 }
