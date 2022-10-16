@@ -51,6 +51,7 @@ static void CLI_ThreadEntry(void const *argument)
     (void)argument;
     char *outputBuffer = FreeRTOS_CLIGetOutputBuffer();
     BaseType_t xReturned;
+    vRegisterCustomCLICommands();
     vRegisterSampleCLICommands();
     CLI_PutStr(helloStr);
 

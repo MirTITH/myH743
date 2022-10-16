@@ -3,7 +3,6 @@
 #include "usb_device.h"
 #include <string>
 #include <iostream>
-#include "sys_monitor.hpp"
 #include "bsp_driver_sd.h"
 #include "freertos_io.h"
 #include "stdio_CLI.h"
@@ -20,7 +19,6 @@ void StartDefaultTask(void const *argument)
     (void)argument;
 
     FreeRTOS_IO_Init();
-
     MX_USB_DEVICE_Init();
 
     // 等待 USB 初始化完成
@@ -28,11 +26,8 @@ void StartDefaultTask(void const *argument)
 
     CLI_Start();
 
-    auto &sys_monitor = SysMonitor::GetInstance();
-
     for (;;) {
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        cout << sys_monitor << endl;
 
         osDelay(500);
     }
