@@ -68,7 +68,8 @@
             "editor.insertSpaces": true,
             "editor.tabSize": 4,
             "editor.autoIndent": "advanced"
-        }
+        },
+        "EIDE.SerialPortMonitor.BaudRate": 115200
     },
     "extensions": {
         "recommendations": [

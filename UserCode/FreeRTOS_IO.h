@@ -2,8 +2,8 @@
  * @file freertos_io.h
  * @author X. Y.
  * @brief FreeRTOS IO 重定向
- * @version 0.1
- * @date 2022-10-12
+ * @version 0.5
+ * @date 2022-10-16
  *
  * @copyright Copyright (c) 2022
  *

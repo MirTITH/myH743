@@ -21,15 +21,15 @@ extern void vRegisterSampleCLICommands(void);
 static char inputBuffer[configCOMMAND_INT_MAX_INPUT_SIZE] = {0};
 
 // 欢迎信息
-const char helloStr[] = "FreeRTOS command server.\r\nType Help to view a list of registered commands.\r\n";
+const char helloStr[] = "\
+FreeRTOS command server.\r\n\
+Type Help to view a list of registered commands.\r\n\
+Love from WTRobot.\r\n\
+";
 
 inline static void CLI_GetStr(char *buffer, int size)
 {
-    osThreadId thisThreadID    = osThreadGetId();
-    osPriority defaultPriority = osThreadGetPriority(thisThreadID);
-    osThreadSetPriority(thisThreadID, osPriorityIdle);
     fgets(buffer, size, stdin);
-    osThreadSetPriority(thisThreadID, defaultPriority);
 
     size_t buffer_length = strlen(buffer);
 
@@ -72,12 +72,12 @@ static void CLI_ThreadEntry(void const *argument)
 void CLI_Start(void)
 {
     osThreadDef_t cliThreadDef = {
-        .name         = (char *)"CLI",
-        .pthread      = CLI_ThreadEntry,
-        .tpriority    = osPriorityBelowNormal,
-        .instances    = 0,
-        .stacksize    = 512,
-        .buffer       = NULL,
+        .name = (char *)"CLI",
+        .pthread = CLI_ThreadEntry,
+        .tpriority = osPriorityBelowNormal,
+        .instances = 0,
+        .stacksize = 512,
+        .buffer = NULL,
         .controlblock = NULL};
 
     osThreadCreate(&cliThreadDef, NULL);

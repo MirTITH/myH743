@@ -23,15 +23,17 @@ void StartDefaultTask(void const *argument)
 
     MX_USB_DEVICE_Init();
 
+    // 等待 USB 初始化完成
+    osDelay(500);
+
     CLI_Start();
 
-    // auto &sys_monitor = SysMonitor::GetInstance();
-
-    string str;
+    auto &sys_monitor = SysMonitor::GetInstance();
 
     for (;;) {
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-        // cout << sys_monitor << endl;
+        cout << sys_monitor << endl;
+
         osDelay(500);
     }
 }

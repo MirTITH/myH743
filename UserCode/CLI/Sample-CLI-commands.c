@@ -142,7 +142,7 @@ static const CLI_Command_Definition_t xParameterEcho =
 	static const CLI_Command_Definition_t xTop =
 	{
 		"top", /* The command string to type. */
-		"top: 和 run-time-stats 相同\r\n\r\n",
+		"top: same as 'run-time-stats'\r\n\r\n",
 		prvRunTimeStatsCommand, /* The function to run. */
 		0 /* No parameters are expected. */
 	};

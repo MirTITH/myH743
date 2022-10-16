@@ -2,8 +2,8 @@
  * @file freertos_io.c
  * @author X. Y.
  * @brief FreeRTOS IO 重定向
- * @version 0.1
- * @date 2022-10-12
+ * @version 0.5
+ * @date 2022-10-16
  *
  * @copyright Copyright (c) 2022
  *
@@ -42,8 +42,7 @@ static TickType_t MAX_CALLBACK_BLOCK_TICK = 10;      // 回调函数的最大阻
  * 以上是待配置内容
  ****************/
 
-/* Stores the handle of the task that will be notified when the transmission is complete. */
-static TaskHandle_t xTaskToNotify = NULL;
+static SemaphoreHandle_t OutputSem;
 
 #ifdef IO_STDIN
 static QueueHandle_t StdinQueue = NULL;
@@ -51,6 +50,8 @@ static QueueHandle_t StdinQueue = NULL;
 
 void FreeRTOS_IO_Init()
 {
+    OutputSem = xSemaphoreCreateBinary();
+    xSemaphoreGive(OutputSem);
 #ifdef IO_STDIN
     StdinQueue = xQueueCreate(IO_STDIN_BufferSize, sizeof(char));
 #endif
@@ -60,20 +61,40 @@ static int FreeRTOS_IO_WriteToSTDOUT(char *pBuffer, int size)
 {
 #ifdef IO_STDOUT
 #if (IO_STDOUT == USE_USB)
-    /* At this point xTaskToNotify should be NULL as no transmission
-        is in progress.  A mutex can be used to guard access to the
-        peripheral if necessary. */
-    configASSERT(xTaskToNotify == NULL);
+    // int sent_size = 0;
+    int sent_size = size; // 欺骗标准库，让它以为成功发送了。否则需要处理异常机制
 
-    /* Store the handle of the calling task. */
-    xTaskToNotify = xTaskGetCurrentTaskHandle();
+    // 判断是否在中断中
+    if (InHandlerMode()) {
+        // 在中断中
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    /* Start the transmission - an interrupt is generated when the
-    transmission is complete. */
-    CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size);
-    ulTaskNotifyTake(pdTRUE, MAX_TX_BLOCK_TICK);
-    xTaskToNotify = NULL;
-    return size;
+        // 从中断中获取信号量，如果成功获取，则说明可以发送；
+        // 如果不能获取，则说明发送处于 busy 状态。由于中断要求尽可能短地执行，所以放弃此次发送
+        if (xSemaphoreTakeFromISR(OutputSem, &xHigherPriorityTaskWoken) == pdTRUE) {
+            if (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_OK) {
+                // 发送成功
+                sent_size = size;
+            } else {
+                // 发送失败，不会进入回调函数，所以要在这里释放信号量，防止卡死
+                xSemaphoreGiveFromISR(OutputSem, &xHigherPriorityTaskWoken);
+            }
+        }
+
+        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    } else {
+        // 在线程中
+        if (xSemaphoreTake(OutputSem, MAX_TX_BLOCK_TICK) == pdTRUE) {
+            if (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_OK) {
+                sent_size = size;
+            } else {
+                xSemaphoreGive(OutputSem);
+            }
+        }
+    }
+
+    return sent_size;
 #else
 
 #endif
@@ -84,10 +105,40 @@ static int FreeRTOS_IO_WriteToSTDERR(char *pBuffer, int size)
 {
 #ifdef IO_STDERR
 #if (IO_STDERR == USE_USB)
-    while (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_BUSY) {
-        portYIELD();
+    // int sent_size = 0;
+    int sent_size = size; // 欺骗标准库，让它以为成功发送了。否则需要处理异常机制
+
+    // 判断是否在中断中
+    if (InHandlerMode()) {
+        // 在中断中
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+        // 从中断中获取信号量，如果成功获取，则说明可以发送；
+        // 如果不能获取，则说明发送处于 busy 状态。由于中断要求尽可能短地执行，所以放弃此次发送
+        if (xSemaphoreTakeFromISR(OutputSem, &xHigherPriorityTaskWoken) == pdTRUE) {
+            if (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_OK) {
+                // 发送成功
+                sent_size = size;
+            } else {
+                // 发送失败，不会进入回调函数，所以要在这里释放信号量，防止卡死
+                xSemaphoreGiveFromISR(OutputSem, &xHigherPriorityTaskWoken);
+            }
+        }
+
+        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    } else {
+        // 在线程中
+        if (xSemaphoreTake(OutputSem, MAX_TX_BLOCK_TICK) == pdTRUE) {
+            if (CDC_Transmit_FS((uint8_t *)pBuffer, (uint16_t)size) == USBD_OK) {
+                sent_size = size;
+            } else {
+                xSemaphoreGive(OutputSem);
+            }
+        }
     }
-    return size;
+
+    return sent_size;
 #else
 
 #endif
@@ -125,16 +176,11 @@ void FreeRTOS_IO_TxCpltCallback()
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    if (xTaskToNotify != NULL) {
-        /* Notify the task that the transmission is complete. */
-        if (InHandlerMode()) {
-            vTaskNotifyGiveFromISR(xTaskToNotify, &xHigherPriorityTaskWoken);
-            portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-        } else {
-            xTaskNotifyGive(xTaskToNotify);
-        }
-        /* There are no transmissions in progress, so no tasks to notify. */
-        xTaskToNotify = NULL;
+    if (InHandlerMode()) {
+        xSemaphoreGiveFromISR(OutputSem, &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    } else {
+        xSemaphoreGive(OutputSem);
     }
 }
 
@@ -179,10 +225,11 @@ void FreeRTOS_IO_RxCallback(char *pBuffer, int size)
  */
 __attribute__((used)) int _write(int fd, char *pBuffer, int size)
 {
-    // return IO_Write(fd, (uint8_t *)pBuffer, size);
+    int result = 0;
     switch (fd) {
-        case STDOUT_FILENO: // 标准输出流
-            return FreeRTOS_IO_WriteToSTDOUT(pBuffer, size);
+        case STDOUT_FILENO: //
+            result = FreeRTOS_IO_WriteToSTDOUT(pBuffer, size);
+
             break;
         case STDERR_FILENO: // 标准错误流
             return FreeRTOS_IO_WriteToSTDERR(pBuffer, size);
@@ -190,10 +237,10 @@ __attribute__((used)) int _write(int fd, char *pBuffer, int size)
         default:
             // EBADF, which means the file descriptor is invalid or the file isn't opened for writing;
             errno = EBADF;
-            return -1;
+            result = -1;
             break;
     }
-    return size;
+    return result;
 }
 
 /**
@@ -240,7 +287,7 @@ __attribute__((used)) int _read(int fd, char *pBuffer, int size)
  */
 int fputc(int ch, FILE *stream)
 {
-    IORetarget_WriteStr(stdout_huart, (uint8_t *)&ch, 1);
+    FreeRTOS_IO_WriteToSTDOUT((uint8_t *)&ch, 1);
     return ch;
 }
 
@@ -248,11 +295,7 @@ int fgetc(FILE *stream)
 {
     (void)stream;
     char ch;
-#if (defined IORETARGET_STDIN_BUFFER_SIZE) && (IORETARGET_STDIN_BUFFER_SIZE > 0)
-    IORetarget_ReadStr(&stdinBufferQueue, &ch, 1);
-#else
-    ch = IORetarget_ReadChar(stdin_huart);
-#endif
+    FreeRTOS_IO_ReadFromSTDIN(&ch, 1);
     return (int)ch;
 }
 
