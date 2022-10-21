@@ -10,6 +10,7 @@
  */
 
 #include "stdio_CLI.h"
+#include "custom_cli_command.h"
 #include "cmsis_os.h"
 #include "FreeRTOS_CLI.h"
 #include <stdio.h>

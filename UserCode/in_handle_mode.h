@@ -10,8 +10,7 @@ extern "C" {
 static inline int InHandlerMode(void)
 {
     uint32_t result;
-    __ASM volatile("MRS %0, ipsr"
-                   : "=r"(result));
+    __ASM volatile ("MRS %0, ipsr" : "=r" (result) );
     return result != 0;
 }
 

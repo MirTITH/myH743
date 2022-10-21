@@ -69,7 +69,8 @@
             "editor.tabSize": 4,
             "editor.autoIndent": "advanced"
         },
-        "EIDE.SerialPortMonitor.BaudRate": 115200
+        "EIDE.SerialPortMonitor.BaudRate": 115200,
+        "cortex-debug.variableUseNaturalFormat": true
     },
     "extensions": {
         "recommendations": [
