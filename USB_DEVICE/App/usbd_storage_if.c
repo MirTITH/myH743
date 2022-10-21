@@ -22,7 +22,7 @@
 #include "usbd_storage_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "w25qxx.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -63,8 +63,8 @@
   */
 
 #define STORAGE_LUN_NBR                  1
-#define STORAGE_BLK_NBR                  0x10000
-#define STORAGE_BLK_SIZ                  0x200
+#define STORAGE_BLK_NBR                  0x800
+#define STORAGE_BLK_SIZ                  0x1000
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -177,8 +177,8 @@ USBD_StorageTypeDef USBD_Storage_Interface_fops_FS =
 int8_t STORAGE_Init_FS(uint8_t lun)
 {
   /* USER CODE BEGIN 2 */
- UNUSED(lun);
-
+  UNUSED(lun);
+  w25_init();
   return (USBD_OK);
   /* USER CODE END 2 */
 }
@@ -230,43 +230,41 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 }
 
 /**
-  * @brief  Reads data from the medium.
-  * @param  lun: Logical unit number.
-  * @param  buf: data buffer.
-  * @param  blk_addr: Logical block address.
-  * @param  blk_len: Blocks number.
-  * @retval USBD_OK if all operations are OK else USBD_FAIL
-  */
+ * @brief  Reads data from the medium.
+ * @param  lun: Logical unit number.
+ * @param  buf: data buffer.
+ * @param  blk_addr: Logical block address.
+ * @param  blk_len: Blocks number.
+ * @retval USBD_OK if all operations are OK else USBD_FAIL
+ */
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
-  /* USER CODE BEGIN 6 */
-  UNUSED(lun);
-  UNUSED(buf);
-  UNUSED(blk_addr);
-  UNUSED(blk_len);
+    /* USER CODE BEGIN 6 */
+    UNUSED(lun);
+    w25_read(blk_addr * W25_SECTOR_SIZE, buf, blk_len * W25_SECTOR_SIZE);
 
-  return (USBD_OK);
-  /* USER CODE END 6 */
+    return (USBD_OK);
+    /* USER CODE END 6 */
 }
 
 /**
-  * @brief  Writes data into the medium.
-  * @param  lun: Logical unit number.
-  * @param  buf: data buffer.
-  * @param  blk_addr: Logical block address.
-  * @param  blk_len: Blocks number.
-  * @retval USBD_OK if all operations are OK else USBD_FAIL
-  */
+ * @brief  Writes data into the medium.
+ * @param  lun: Logical unit number.
+ * @param  buf: data buffer.
+ * @param  blk_addr: Logical block address.
+ * @param  blk_len: Blocks number.
+ * @retval USBD_OK if all operations are OK else USBD_FAIL
+ */
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
-  /* USER CODE BEGIN 7 */
-  UNUSED(lun);
-  UNUSED(buf);
-  UNUSED(blk_addr);
-  UNUSED(blk_len);
+    /* USER CODE BEGIN 7 */
+    // erase subsectors
+    w25_erase(blk_addr * W25_SECTOR_SIZE, blk_len * W25_SECTOR_SIZE);
 
-  return (USBD_OK);
-  /* USER CODE END 7 */
+    // write data
+    w25_write(blk_addr * W25_SECTOR_SIZE, buf, blk_len * W25_SECTOR_SIZE);
+    return (USBD_OK);
+    /* USER CODE END 7 */
 }
 
 /**
