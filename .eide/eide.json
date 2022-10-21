@@ -10,8 +10,6 @@
     "Middlewares",
     "STM32CubeIDE",
     "USB_DEVICE",
-    "LIBJPEG",
-    "Utilities",
     "FATFS"
   ],
   "virtualFolder": {

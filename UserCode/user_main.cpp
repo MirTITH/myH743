@@ -33,7 +33,7 @@ void StartDefaultTask(void const *argument)
 
     CLI_Start();
 
-    w25_write(0, buff, 5);
+    // w25_write(0, buff, 5);
 
     for (;;) {
         w25_dump(0, 256);
