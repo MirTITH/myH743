@@ -33,6 +33,7 @@ W25_result_t w25_read(uint32_t address, uint8_t *dat, uint32_t len);
 W25_result_t w25_read_decrypt(uint32_t address, uint8_t *key, uint8_t *dat, uint32_t len);
 
 W25_result_t w25_write(uint32_t address, uint8_t *dat, uint32_t len);
+W25_result_t w25_write_auto_erase(uint32_t address, uint8_t *dat, uint32_t len);
 W25_result_t w25_write_encrypt(uint32_t address, uint8_t *key, uint8_t *dat, uint32_t len);
 
 W25_result_t w25_erase(uint32_t address, uint32_t len);

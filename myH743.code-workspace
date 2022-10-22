@@ -62,7 +62,8 @@
             "initializer_list": "cpp",
             "iosfwd": "cpp",
             "limits": "cpp",
-            "typeinfo": "cpp"
+            "typeinfo": "cpp",
+            "chrono": "c"
         },
         "[yaml]": {
             "editor.insertSpaces": true,

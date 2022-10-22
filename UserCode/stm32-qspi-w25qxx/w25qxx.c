@@ -89,9 +89,42 @@ W25_result_t w25_read_decrypt(uint32_t address, uint8_t *key, uint8_t *dat, uint
     return return_value;
 }
 
+static W25_result_t w25_page_writable(uint32_t page)
+{
+    uint8_t temp;
+    for (uint32_t now_address = page * W25_PAGE_SIZE; now_address < (page + 1) * W25_PAGE_SIZE; now_address++) {
+        w25_read(now_address, &temp, 1);
+        if (temp != 0xff) {
+            return W25_Err;
+        }
+    }
+    return W25_Ok;
+}
+
+W25_result_t w25_write_auto_erase(uint32_t address, uint8_t *dat, uint32_t len)
+{
+    uint32_t now_page = address / W25_PAGE_SIZE;
+    while (len > 0) {
+        if (w25_page_writable(now_page) == W25_Err) {
+            w25_erase(now_page * W25_PAGE_SIZE, W25_PAGE_SIZE);
+        }
+
+        if (len > W25_PAGE_SIZE) {
+            w25_write(address, dat, W25_PAGE_SIZE);
+            address += W25_PAGE_SIZE;
+            dat += W25_PAGE_SIZE;
+            len -= W25_PAGE_SIZE;
+        } else {
+            w25_write(address, dat, len);
+            len = 0;
+        }
+        now_page++;
+    }
+    return W25_Ok;
+}
+
 W25_result_t w25_write(uint32_t address, uint8_t *dat, uint32_t len)
 {
-
     uint32_t start_page = address / W25_PAGE_SIZE;
     uint32_t end_page = (address + len - 1) / W25_PAGE_SIZE;
     uint32_t start_address, number;
@@ -165,7 +198,7 @@ W25_result_t w25_erase(uint32_t address, uint32_t len)
 
     // First let's find the start sector
     uint32_t start_sector = address / W25_SECTOR_SIZE;
-    uint32_t end_sector = (address + len) / W25_SECTOR_SIZE;
+    uint32_t end_sector = (address + len - 1) / W25_SECTOR_SIZE;
 
     // DBG("w25_erase s=0x%08x e=0x%08x", start_sector, end_sector);
 

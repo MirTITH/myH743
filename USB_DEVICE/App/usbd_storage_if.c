@@ -259,10 +259,12 @@ int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t b
 {
     /* USER CODE BEGIN 7 */
     // erase subsectors
-    w25_erase(blk_addr * W25_SECTOR_SIZE, blk_len * W25_SECTOR_SIZE);
+    HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+    // w25_erase(blk_addr * W25_SECTOR_SIZE, blk_len * W25_SECTOR_SIZE);
 
     // write data
-    w25_write(blk_addr * W25_SECTOR_SIZE, buf, blk_len * W25_SECTOR_SIZE);
+    // w25_write(blk_addr * W25_SECTOR_SIZE, buf, blk_len * W25_SECTOR_SIZE);
+    w25_write_auto_erase(blk_addr * W25_SECTOR_SIZE, buf, blk_len * W25_SECTOR_SIZE);
     return (USBD_OK);
     /* USER CODE END 7 */
 }

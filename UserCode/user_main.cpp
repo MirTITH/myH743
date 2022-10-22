@@ -23,22 +23,17 @@ void StartDefaultTask(void const *argument)
 {
     (void)argument;
 
-    // w25_init();
-
     // FreeRTOS_IO_Init();
     MX_USB_DEVICE_Init();
 
     // 等待 USB 初始化完成
     osDelay(500);
 
-    CLI_Start();
-
-    // w25_write(0, buff, 5);
+    // CLI_Start();
 
     for (;;) {
-        // w25_dump(0, 256);
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-        osDelay(1000);
+        osDelay(500);
     }
 }
