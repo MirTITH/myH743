@@ -63,7 +63,8 @@
             "iosfwd": "cpp",
             "limits": "cpp",
             "typeinfo": "cpp",
-            "chrono": "c"
+            "chrono": "c",
+            "forward_list": "c"
         },
         "[yaml]": {
             "editor.insertSpaces": true,
