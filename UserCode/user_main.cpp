@@ -23,16 +23,18 @@ void StartDefaultTask(void const *argument)
 {
     (void)argument;
 
-    // FreeRTOS_IO_Init();
+    FreeRTOS_IO_Init();
     MX_USB_DEVICE_Init();
 
     // 等待 USB 初始化完成
     osDelay(500);
 
-    // CLI_Start();
+    CLI_Start();
 
     for (;;) {
-        // HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+
+        cout << "Hello" << endl;
 
         osDelay(500);
     }

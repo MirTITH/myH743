@@ -27,8 +27,7 @@
     "Debug": {
       "excludeList": [
         "STM32CubeIDE/Application/User/Core/sysmem.c",
-        "STM32CubeIDE/Application/User/Core/syscalls.c",
-        "UserCode/freertos_io.c"
+        "STM32CubeIDE/Application/User/Core/syscalls.c"
       ],
       "toolchain": "GCC",
       "compileConfig": {
