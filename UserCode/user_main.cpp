@@ -106,26 +106,12 @@ void StartDefaultTask(void const *argument)
     osDelay(2000);
 
     for (;;) {
-        // vTaskSuspendAll();
-
-        // for (int i = 0; i < valueArray_Size; i++) {
-        //     for (int j = 0; j < 1e3; j++) {
-        //         temp++;
-        //     }
-        // }
-        uint64_t tickStart = HPT_GetNs();
-        // osDelay(2);
-        HPT_DelayUs(20);
-        uint64_t tickEnd = HPT_GetNs();
-        // xTaskResumeAll();
+        uint64_t tickStart = HPT_GetUs();
+        HPT_DelayUs(800);
+        uint64_t tickEnd = HPT_GetUs();
         cout << tickEnd << ',';
         cout << tickStart << ',';
         cout << tickEnd - tickStart << endl;
-
-        // cout << test_buf << endl;
-        // for (int i = 0; i < valueArray_Size; i++) {
-        //     cout << valueArray[i] << endl;
-        // }
 
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         osDelay(500);
