@@ -31,40 +31,54 @@
 #include "quadspi.h"
 #include "cmsis_os.h"
 #include "in_handle_mode.h"
+#include "high_precision_time.h"
 
-extern QSPI_HandleTypeDef hqspi;
+typedef struct
+{
+    QSPI_HandleTypeDef *pqspi;
+    SemaphoreHandle_t sem;
+} SFUD_UserData_t;
+
+static SFUD_UserData_t qspiUserData;
+
 void sfud_log_info(const char *format, ...);
 
-// static uint32_t sfud_uxSavedInterruptStatus;
-
-static void spi_lock(const sfud_spi *spi)
+static void qspi_lock(const sfud_spi *spi)
 {
-    (void)spi;
+    SemaphoreHandle_t sem = ((SFUD_UserData_t *)spi->user_data)->sem;
+    // 判断是否在中断中
     if (InHandlerMode()) {
-        // sfud_uxSavedInterruptStatus = taskENTER_CRITICAL_FROM_ISR();
+        // 在中断中
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        xSemaphoreTakeFromISR(sem, &xHigherPriorityTaskWoken);
+        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     } else {
-        vTaskSuspendAll();
-        // taskENTER_CRITICAL();
+        // 在线程中
+        xSemaphoreTake(sem, portMAX_DELAY);
     }
-    // __disable_irq();
 }
 
-static void spi_unlock(const sfud_spi *spi)
+static void qspi_unlock(const sfud_spi *spi)
 {
-    (void)spi;
+    SemaphoreHandle_t sem = ((SFUD_UserData_t *)spi->user_data)->sem;
+    // 判断是否在中断中
     if (InHandlerMode()) {
-        // taskEXIT_CRITICAL_FROM_ISR(sfud_uxSavedInterruptStatus);
+        // 在中断中
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
+        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     } else {
-        xTaskResumeAll();
-        // taskEXIT_CRITICAL();
+        // 在线程中
+        xSemaphoreGive(sem);
     }
-    // __enable_irq();
 }
 
 /**
  * This function can send or send then receive QSPI data.
  */
-sfud_err qspi_send_then_recv(const void *send_buf, size_t send_length, void *recv_buf, size_t recv_length)
+sfud_err qspi_send_then_recv(QSPI_HandleTypeDef *pqspi, const void *send_buf, size_t send_length, void *recv_buf, size_t recv_length)
 {
     assert_param(send_buf);
     assert_param(recv_buf);
@@ -119,12 +133,12 @@ sfud_err qspi_send_then_recv(const void *send_buf, size_t send_length, void *rec
         /* set recv size */
         Cmdhandler.DataMode = QSPI_DATA_1_LINE;
         Cmdhandler.NbData = recv_length;
-        HAL_QSPI_Command(&hqspi, &Cmdhandler, 5000);
+        HAL_QSPI_Command(pqspi, &Cmdhandler, 5000);
 
         if (recv_length != 0) {
-            if (HAL_QSPI_Receive(&hqspi, recv_buf, 5000) != HAL_OK) {
-                sfud_log_info("qspi recv data failed(%d)!", hqspi.ErrorCode);
-                hqspi.State = HAL_QSPI_STATE_READY;
+            if (HAL_QSPI_Receive(pqspi, recv_buf, 5000) != HAL_OK) {
+                sfud_log_info("qspi recv data failed(%d)!", pqspi->ErrorCode);
+                pqspi->State = HAL_QSPI_STATE_READY;
                 result = SFUD_ERR_READ;
             }
         }
@@ -144,12 +158,12 @@ sfud_err qspi_send_then_recv(const void *send_buf, size_t send_length, void *rec
 
         /* set send buf and send size */
         Cmdhandler.NbData = send_length - count;
-        HAL_QSPI_Command(&hqspi, &Cmdhandler, 5000);
+        HAL_QSPI_Command(pqspi, &Cmdhandler, 5000);
 
         if (send_length - count > 0) {
-            if (HAL_QSPI_Transmit(&hqspi, (uint8_t *)(ptr + count), 5000) != HAL_OK) {
-                sfud_log_info("qspi send data failed(%d)!", hqspi.ErrorCode);
-                hqspi.State = HAL_QSPI_STATE_READY;
+            if (HAL_QSPI_Transmit(pqspi, (uint8_t *)(ptr + count), 5000) != HAL_OK) {
+                sfud_log_info("qspi send data failed(%d)!", pqspi->ErrorCode);
+                pqspi->State = HAL_QSPI_STATE_READY;
                 result = SFUD_ERR_WRITE;
             }
         }
@@ -170,8 +184,6 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 {
     sfud_err result = SFUD_SUCCESS;
 
-    (void)spi;
-
     // spi_user_data_t spi_dev = (spi_user_data_t) spi->user_data;
 
     if (write_size) {
@@ -187,10 +199,10 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 
     if (write_size && read_size) {
         /* read data */
-        qspi_send_then_recv(write_buf, write_size, read_buf, read_size);
+        qspi_send_then_recv(((SFUD_UserData_t *)(spi->user_data))->pqspi, write_buf, write_size, read_buf, read_size);
     } else if (write_size) {
         /* send data */
-        qspi_send_then_recv(write_buf, write_size, NULL, 0);
+        qspi_send_then_recv(((SFUD_UserData_t *)(spi->user_data))->pqspi, write_buf, write_size, NULL, 0);
     }
 
     /* set cs pin */
@@ -207,10 +219,9 @@ static sfud_err spi_write_read(const sfud_spi *spi, const uint8_t *write_buf, si
 static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi_read_cmd_format *qspi_read_cmd_format,
                           uint8_t *read_buf, size_t read_size)
 {
-    (void)spi;
+    QSPI_HandleTypeDef *pqspi = ((SFUD_UserData_t *)(spi->user_data))->pqspi;
     sfud_err result = SFUD_SUCCESS;
     QSPI_CommandTypeDef Cmdhandler;
-    extern QSPI_HandleTypeDef hqspi;
 
     /* set cmd struct */
     Cmdhandler.Instruction = qspi_read_cmd_format->instruction;
@@ -257,11 +268,11 @@ static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi
     Cmdhandler.AlternateByteMode = QSPI_ALTERNATE_BYTES_NONE;
     Cmdhandler.DdrMode = QSPI_DDR_MODE_DISABLE;
     Cmdhandler.DdrHoldHalfCycle = QSPI_DDR_HHC_ANALOG_DELAY;
-    HAL_QSPI_Command(&hqspi, &Cmdhandler, 5000);
+    HAL_QSPI_Command(pqspi, &Cmdhandler, 5000);
 
-    if (HAL_QSPI_Receive(&hqspi, read_buf, 5000) != HAL_OK) {
-        sfud_log_info("qspi recv data failed(%d)!", hqspi.ErrorCode);
-        hqspi.State = HAL_QSPI_STATE_READY;
+    if (HAL_QSPI_Receive(pqspi, read_buf, 5000) != HAL_OK) {
+        sfud_log_info("qspi recv data failed(%d)!", pqspi->ErrorCode);
+        pqspi->State = HAL_QSPI_STATE_READY;
         result = SFUD_ERR_READ;
     }
 
@@ -269,13 +280,9 @@ static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi
 }
 #endif /* SFUD_USING_QSPI */
 
-static void retry_delay_1ms(void)
+static void retry_delay(void)
 {
-    if (InHandlerMode()) {
-        HAL_Delay(1);
-    } else {
-        vTaskDelay(1);
-    }
+    HPT_DelayUs(10);
 }
 
 sfud_err sfud_spi_port_init(sfud_flash *flash)
@@ -302,14 +309,17 @@ sfud_err sfud_spi_port_init(sfud_flash *flash)
             /* set the interfaces and data */
             flash->spi.wr = spi_write_read;
             flash->spi.qspi_read = qspi_read;
-            flash->spi.lock = spi_lock;
-            flash->spi.unlock = spi_unlock;
-            flash->spi.user_data = &hqspi;
-            /* about 100 microsecond delay */
-            flash->retry.delay = retry_delay_1ms;
-            /* adout 60 seconds timeout */
-            flash->retry.times = 60 * 1000;
+            flash->spi.lock = qspi_lock;
+            flash->spi.unlock = qspi_unlock;
+            flash->spi.user_data = &qspiUserData;
 
+            flash->retry.delay = retry_delay;
+            flash->retry.times = 6 * 100000;
+
+            extern QSPI_HandleTypeDef hqspi;
+            qspiUserData.sem = xSemaphoreCreateBinary();
+            xSemaphoreGive(qspiUserData.sem);
+            qspiUserData.pqspi = &hqspi;
             break;
         }
     }
