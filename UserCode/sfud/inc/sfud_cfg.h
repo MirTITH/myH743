@@ -40,9 +40,9 @@ enum {
 };
 
 #define SFUD_FLASH_DEVICE_TABLE                                                \
-{                                                                              \
-    [SFUD_W25Q64_DEVICE_INDEX] = {.name = "W25Q64JV", .spi.name = "QSPI"},           \
-}
+    {                                                                          \
+        [SFUD_W25Q64_DEVICE_INDEX] = {.name = "W25Q64JV", .spi.name = "QSPI"}, \
+    }
 
 #define SFUD_USING_QSPI
 
