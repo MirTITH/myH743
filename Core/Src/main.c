@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
+#include "fatfs.h"
 #include "i2c.h"
 #include "i2s.h"
 #include "quadspi.h"
@@ -115,6 +116,7 @@ int main(void)
   MX_QUADSPI_Init();
   MX_SPI1_Init();
   MX_ADC3_Init();
+  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */

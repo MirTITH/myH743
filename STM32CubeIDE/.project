@@ -212,6 +212,31 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c</locationURI>
 		</link>
 		<link>
+			<name>Middlewares/FatFs/cc936.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/option/cc936.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FatFs/diskio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/diskio.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FatFs/ff.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FatFs/ff_gen_drv.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/FatFs/syscall.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/option/syscall.c</locationURI>
+		</link>
+		<link>
 			<name>Middlewares/FreeRTOS/cmsis_os.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS/cmsis_os.c</locationURI>
@@ -345,6 +370,16 @@
 			<name>Application/User/Core/usart.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/usart.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/FATFS/App/fatfs.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/FATFS/App/fatfs.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/FATFS/Target/user_diskio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/FATFS/Target/user_diskio.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/USB_DEVICE/App/usb_device.c</name>
