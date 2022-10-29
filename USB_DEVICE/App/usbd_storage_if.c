@@ -22,7 +22,8 @@
 #include "usbd_storage_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "sfud.h"
+#include "user_main.hpp"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -67,7 +68,8 @@
 #define STORAGE_BLK_SIZ                  0x200
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
-
+#undef STORAGE_BLK_NBR
+#undef STORAGE_BLK_SIZ
 /* USER CODE END PRIVATE_DEFINES */
 
 /**
@@ -195,8 +197,8 @@ int8_t STORAGE_GetCapacity_FS(uint8_t lun, uint32_t *block_num, uint16_t *block_
   /* USER CODE BEGIN 3 */
   UNUSED(lun);
 
-  *block_num  = STORAGE_BLK_NBR;
-  *block_size = STORAGE_BLK_SIZ;
+  *block_num  = QspiFlash->chip.capacity / QspiFlash->chip.erase_gran;
+  *block_size = QspiFlash->chip.erase_gran;
   return (USBD_OK);
   /* USER CODE END 3 */
 }
@@ -240,12 +242,12 @@ int8_t STORAGE_IsWriteProtected_FS(uint8_t lun)
 int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 6 */
-  UNUSED(lun);
-  UNUSED(buf);
-  UNUSED(blk_addr);
-  UNUSED(blk_len);
+    UNUSED(lun);
 
-  return (USBD_OK);
+    const uint32_t sector_size = QspiFlash->chip.erase_gran;
+    sfud_read(QspiFlash, blk_addr * sector_size, blk_len * sector_size, buf);
+
+    return (USBD_OK);
   /* USER CODE END 6 */
 }
 
@@ -260,12 +262,15 @@ int8_t STORAGE_Read_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t bl
 int8_t STORAGE_Write_FS(uint8_t lun, uint8_t *buf, uint32_t blk_addr, uint16_t blk_len)
 {
   /* USER CODE BEGIN 7 */
-  UNUSED(lun);
-  UNUSED(buf);
-  UNUSED(blk_addr);
-  UNUSED(blk_len);
+    UNUSED(lun);
+    UNUSED(buf);
+    UNUSED(blk_addr);
+    UNUSED(blk_len);
 
-  return (USBD_OK);
+    const uint32_t sector_size = QspiFlash->chip.erase_gran;
+    sfud_erase_write(QspiFlash, blk_addr * sector_size, blk_len * sector_size, buf);
+
+    return (USBD_OK);
   /* USER CODE END 7 */
 }
 

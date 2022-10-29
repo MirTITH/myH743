@@ -7,15 +7,13 @@
 #include "freertos_io.h"
 #include "stdio_CLI.h"
 #include "high_precision_time.h"
-#include "sfud.h"
-#include "sfud_test.h"
 
 // #include <nlohmann/json.hpp>
 
 using namespace std;
 // using json = nlohmann::json;
 
-static uint8_t test_buff[409600];
+sfud_flash *QspiFlash;
 
 uint8_t BSP_SD_IsDetected(void)
 {
@@ -27,6 +25,10 @@ void StartDefaultTask(void const *argument)
     (void)argument;
 
     FreeRTOS_IO_Init();
+
+    QspiFlash = sfud_get_device(SFUD_W25Q64_DEVICE_INDEX);
+    sfud_device_init(QspiFlash);
+
     MX_USB_DEVICE_Init();
 
     // 等待 USB 初始化完成
@@ -34,11 +36,6 @@ void StartDefaultTask(void const *argument)
     osDelay(2000); // 使得用户有足够的时间打开 USB 串口，防止错过开头的消息。
 
     CLI_Start();
-
-    auto flashDevice = sfud_get_device(SFUD_W25Q64_DEVICE_INDEX);
-    sfud_device_init(flashDevice);
-
-    sfud_demo(flashDevice, 0, 409600, test_buff);
 
     for (;;) {
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
