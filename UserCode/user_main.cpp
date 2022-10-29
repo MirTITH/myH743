@@ -3,7 +3,7 @@
 #include "usb_device.h"
 #include <string>
 #include <iostream>
-#include "bsp_driver_sd.h"
+// #include "bsp_driver_sd.h"
 #include "freertos_io.h"
 #include "stdio_CLI.h"
 #include "high_precision_time.h"
@@ -15,10 +15,10 @@ using namespace std;
 
 sfud_flash *QspiFlash;
 
-uint8_t BSP_SD_IsDetected(void)
-{
-    return SD_NOT_PRESENT;
-}
+// uint8_t BSP_SD_IsDetected(void)
+// {
+//     return SD_NOT_PRESENT;
+// }
 
 void StartDefaultTask(void const *argument)
 {

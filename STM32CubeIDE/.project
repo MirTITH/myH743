@@ -167,16 +167,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_rtc_ex.c</locationURI>
 		</link>
 		<link>
-			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_sd.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd.c</locationURI>
-		</link>
-		<link>
-			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_sd_ex.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_sd_ex.c</locationURI>
-		</link>
-		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_spi.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_spi.c</locationURI>
@@ -212,49 +202,14 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_uart_ex.c</locationURI>
 		</link>
 		<link>
-			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_ll_delayblock.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_delayblock.c</locationURI>
-		</link>
-		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_ll_fmc.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_fmc.c</locationURI>
 		</link>
 		<link>
-			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_ll_sdmmc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_sdmmc.c</locationURI>
-		</link>
-		<link>
 			<name>Drivers/STM32H7xx_HAL_Driver/stm32h7xx_ll_usb.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_ll_usb.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/FatFs/cc936.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/option/cc936.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/FatFs/diskio.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/diskio.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/FatFs/ff.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/FatFs/ff_gen_drv.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/FatFs/syscall.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/option/syscall.c</locationURI>
 		</link>
 		<link>
 			<name>Middlewares/FreeRTOS/cmsis_os.c</name>
@@ -302,6 +257,11 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FreeRTOS/Source/timers.c</locationURI>
 		</link>
 		<link>
+			<name>Middlewares/USB_Device_Library/usbd_cdc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c</locationURI>
+		</link>
+		<link>
 			<name>Middlewares/USB_Device_Library/usbd_core.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c</locationURI>
@@ -315,26 +275,6 @@
 			<name>Middlewares/USB_Device_Library/usbd_ioreq.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/USB_Device_Library/usbd_msc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/USB_Device_Library/usbd_msc_bot.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_bot.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/USB_Device_Library/usbd_msc_data.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_data.c</locationURI>
-		</link>
-		<link>
-			<name>Middlewares/USB_Device_Library/usbd_msc_scsi.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/ST/STM32_USB_Device_Library/Class/MSC/Src/usbd_msc_scsi.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/Core/adc.c</name>
@@ -382,11 +322,6 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/rtc.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/Core/sdmmc.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/sdmmc.c</locationURI>
-		</link>
-		<link>
 			<name>Application/User/Core/spi.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/spi.c</locationURI>
@@ -412,34 +347,19 @@
 			<locationURI>PARENT-1-PROJECT_LOC/Core/Src/usart.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/FATFS/App/fatfs.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/FATFS/App/fatfs.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/FATFS/Target/bsp_driver_sd.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/FATFS/Target/bsp_driver_sd.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/FATFS/Target/sd_diskio.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/FATFS/Target/sd_diskio.c</locationURI>
-		</link>
-		<link>
 			<name>Application/User/USB_DEVICE/App/usb_device.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usb_device.c</locationURI>
 		</link>
 		<link>
+			<name>Application/User/USB_DEVICE/App/usbd_cdc_if.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usbd_cdc_if.c</locationURI>
+		</link>
+		<link>
 			<name>Application/User/USB_DEVICE/App/usbd_desc.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usbd_desc.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/USB_DEVICE/App/usbd_storage_if.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/USB_DEVICE/App/usbd_storage_if.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/USB_DEVICE/Target/usbd_conf.c</name>

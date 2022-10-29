@@ -20,12 +20,10 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "adc.h"
-#include "fatfs.h"
 #include "i2c.h"
 #include "i2s.h"
 #include "quadspi.h"
 #include "rtc.h"
-#include "sdmmc.h"
 #include "spi.h"
 #include "usart.h"
 #include "usb_device.h"
@@ -117,8 +115,6 @@ int main(void)
   MX_QUADSPI_Init();
   MX_SPI1_Init();
   MX_ADC3_Init();
-  MX_SDMMC1_SD_Init();
-  MX_FATFS_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
