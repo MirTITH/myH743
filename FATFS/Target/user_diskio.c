@@ -1,20 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
  ******************************************************************************
-  * @file    user_diskio.c
-  * @brief   This file includes a diskio driver skeleton to be completed by the user.
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
-  ******************************************************************************
-  */
+ * @file    user_diskio.c
+ * @brief   This file includes a diskio driver skeleton to be completed by the user.
+ ******************************************************************************
+ * @attention
+ *
+ * Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software is licensed under terms that can be found in the LICENSE file
+ * in the root directory of this software component.
+ * If no LICENSE file comes with this software, it is provided AS-IS.
+ *
+ ******************************************************************************
+ */
  /* USER CODE END Header */
 
 #ifdef USE_OBSOLETE_USER_CODE_SECTION_0
@@ -35,7 +35,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include "ff_gen_drv.h"
-
+#include "sfud.h"
+#include "user_main.hpp"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 
@@ -117,7 +118,21 @@ DRESULT USER_read (
 )
 {
   /* USER CODE BEGIN READ */
-    return RES_OK;
+    sfud_err sfud_result;
+    DRESULT result;
+    sfud_result = sfud_read(QspiFlash, sector * QspiFlash->chip.erase_gran, count * QspiFlash->chip.erase_gran, buff);
+
+    switch (sfud_result) {
+        case SFUD_SUCCESS:
+            result = RES_OK;
+            break;
+
+        default:
+            result = RES_ERROR;
+            break;
+    }
+
+    return result;
   /* USER CODE END READ */
 }
 
@@ -138,8 +153,19 @@ DRESULT USER_write (
 )
 {
   /* USER CODE BEGIN WRITE */
-  /* USER CODE HERE */
-    return RES_OK;
+    sfud_err sfud_result;
+    DRESULT result;
+    sfud_result = sfud_erase_write(QspiFlash, sector * QspiFlash->chip.erase_gran, count * QspiFlash->chip.erase_gran, buff);
+    switch (sfud_result) {
+        case SFUD_SUCCESS:
+            result = RES_OK;
+            break;
+
+        default:
+            result = RES_ERROR;
+            break;
+    }
+    return result;
   /* USER CODE END WRITE */
 }
 #endif /* _USE_WRITE == 1 */
@@ -159,8 +185,20 @@ DRESULT USER_ioctl (
 )
 {
   /* USER CODE BEGIN IOCTL */
-    DRESULT res = RES_ERROR;
-    return res;
+    switch (cmd) {
+        case GET_SECTOR_COUNT:
+            *(DWORD *)buff = 2048; // 总的扇区�?
+            break;
+
+        case GET_SECTOR_SIZE:
+            *(WORD *)buff = 4096; // 定义�?个扇区大小为4K
+            break;
+
+        case GET_BLOCK_SIZE:
+            *(DWORD *)buff = 65536; // 定义�?个块大小�?64K
+            break;
+    }
+    return RES_OK;
   /* USER CODE END IOCTL */
 }
 #endif /* _USE_IOCTL == 1 */
