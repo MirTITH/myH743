@@ -4,7 +4,7 @@
 
 using namespace std;
 
-void sfud_demo(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data)
+void sfud_WriteReadTest(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data)
 {
     uint32_t tickStart, tickEnd;
     sfud_err result = SFUD_SUCCESS;
@@ -40,7 +40,7 @@ void sfud_demo(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *dat
     result = sfud_read(flash, addr, size, data);
     tickEnd = HPT_GetUs();
     if (result == SFUD_SUCCESS) {
-        printf("Read the %s flash data success. Start from 0x%08lX, size is %u. The data is:\r\n", flash->name, addr, size);
+        printf("Read the %s flash data success. Start from 0x%08lx, size is %u. The data is:\r\n", flash->name, addr, size);
         // printf("Offset (h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\r\n");
         // for (i = 0; i < size; i++) {
         //     if (i % 16 == 0) {
@@ -65,5 +65,23 @@ void sfud_demo(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *dat
     }
     if (i == size) {
         printf("The %s flash test is success.\r\n", flash->name);
+    }
+}
+
+void sfud_ReadTest(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data)
+{
+    uint32_t tickStart, tickEnd;
+    sfud_err result = SFUD_SUCCESS;
+
+    /* read test */
+    tickStart = HPT_GetUs();
+    result = sfud_read(flash, addr, size, data);
+    tickEnd = HPT_GetUs();
+    if (result == SFUD_SUCCESS) {
+        printf("Read the %s flash data success. Start from 0x%08lx, size is %u.\r\n", flash->name, addr, size);
+        printf("\r\n");
+        cout << "time: " << tickEnd - tickStart << "us.\tSpeed: " << (double)(1e6 / 1024) * size / (tickEnd - tickStart) << "KB/s" << endl;
+    } else {
+        printf("Read the %s flash data failed.\r\n", flash->name);
     }
 }

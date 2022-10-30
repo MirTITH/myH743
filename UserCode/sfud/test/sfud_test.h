@@ -7,13 +7,22 @@ extern "C" {
 #include "sfud.h"
 
 /**
- * SFUD demo for the first flash device test.
+ * SFUD write and read test. Warning: this test will write data to the flash. 
  *
  * @param addr flash start address
  * @param size test flash size
  * @param size test flash data buffer
  */
-void sfud_demo(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data);
+void sfud_WriteReadTest(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data);
+
+/**
+ * SFUD read test. 
+ *
+ * @param addr flash start address
+ * @param size test flash size
+ * @param size test flash data buffer
+ */
+void sfud_ReadTest(const sfud_flash *flash, uint32_t addr, size_t size, uint8_t *data);
 
 #ifdef __cplusplus
 }

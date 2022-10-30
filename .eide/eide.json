@@ -33,7 +33,7 @@
       "compileConfig": {
         "cpuType": "Cortex-M7",
         "floatingPointHardware": "double",
-        "scatterFilePath": "STM32CubeIDE/STM32H743VITX_FLASH.ld",
+        "scatterFilePath": "STM32CubeIDE/STM32H743VITX_FLASH_DTCRAM.ld",
         "useCustomScatterFile": true,
         "storageLayout": {
           "RAM": [],

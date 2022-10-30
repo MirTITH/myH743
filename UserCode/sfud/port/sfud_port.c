@@ -36,7 +36,7 @@
 typedef struct
 {
     QSPI_HandleTypeDef *pqspi;
-    SemaphoreHandle_t sem;
+    SemaphoreHandle_t mutex;
 } SFUD_UserData_t;
 
 static SFUD_UserData_t qspiUserData;
@@ -45,33 +45,33 @@ void sfud_log_info(const char *format, ...);
 
 static void qspi_lock(const sfud_spi *spi)
 {
-    SemaphoreHandle_t sem = ((SFUD_UserData_t *)spi->user_data)->sem;
+    SemaphoreHandle_t mutex = ((SFUD_UserData_t *)spi->user_data)->mutex;
     // 判断是否在中断中
     if (InHandlerMode()) {
         // 在中断中
-        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-        xSemaphoreTakeFromISR(sem, &xHigherPriorityTaskWoken);
-        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        // BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        // xSemaphoreTakeFromISR(sem, &xHigherPriorityTaskWoken);
+        // // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     } else {
         // 在线程中
-        xSemaphoreTake(sem, portMAX_DELAY);
+        xSemaphoreTake(mutex, portMAX_DELAY);
     }
 }
 
 static void qspi_unlock(const sfud_spi *spi)
 {
-    SemaphoreHandle_t sem = ((SFUD_UserData_t *)spi->user_data)->sem;
+    SemaphoreHandle_t mutex = ((SFUD_UserData_t *)spi->user_data)->mutex;
     // 判断是否在中断中
     if (InHandlerMode()) {
         // 在中断中
-        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-        xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
-        // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
-        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+        // BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        // xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
+        // // 判断是否有需要切换的线程。如果有，中断结束后会立即切换线程，提高实时性
+        // portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     } else {
         // 在线程中
-        xSemaphoreGive(sem);
+        xSemaphoreGive(mutex);
     }
 }
 
@@ -282,7 +282,7 @@ static sfud_err qspi_read(const struct __sfud_spi *spi, uint32_t addr, sfud_qspi
 
 static void retry_delay(void)
 {
-    HPT_DelayUs(10);
+    HPT_DelayUs(100);
 }
 
 sfud_err sfud_spi_port_init(sfud_flash *flash)
@@ -314,11 +314,10 @@ sfud_err sfud_spi_port_init(sfud_flash *flash)
             flash->spi.user_data = &qspiUserData;
 
             flash->retry.delay = retry_delay;
-            flash->retry.times = 6 * 100000;
+            flash->retry.times = 6 * 10000;
 
             extern QSPI_HandleTypeDef hqspi;
-            qspiUserData.sem = xSemaphoreCreateBinary();
-            xSemaphoreGive(qspiUserData.sem);
+            qspiUserData.mutex = xSemaphoreCreateMutex();
             qspiUserData.pqspi = &hqspi;
             break;
         }
