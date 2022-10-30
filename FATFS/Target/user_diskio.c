@@ -15,7 +15,7 @@
  *
  ******************************************************************************
  */
- /* USER CODE END Header */
+/* USER CODE END Header */
 
 #ifdef USE_OBSOLETE_USER_CODE_SECTION_0
 /*
@@ -47,77 +47,93 @@ static volatile DSTATUS Stat = STA_NOINIT;
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
-DSTATUS USER_initialize (BYTE pdrv);
-DSTATUS USER_status (BYTE pdrv);
-DRESULT USER_read (BYTE pdrv, BYTE *buff, DWORD sector, UINT count);
+DSTATUS USER_initialize(BYTE pdrv);
+DSTATUS USER_status(BYTE pdrv);
+DRESULT USER_read(BYTE pdrv, BYTE *buff, DWORD sector, UINT count);
 #if _USE_WRITE == 1
-  DRESULT USER_write (BYTE pdrv, const BYTE *buff, DWORD sector, UINT count);
+DRESULT USER_write(BYTE pdrv, const BYTE *buff, DWORD sector, UINT count);
 #endif /* _USE_WRITE == 1 */
 #if _USE_IOCTL == 1
-  DRESULT USER_ioctl (BYTE pdrv, BYTE cmd, void *buff);
+DRESULT USER_ioctl(BYTE pdrv, BYTE cmd, void *buff);
 #endif /* _USE_IOCTL == 1 */
 
-Diskio_drvTypeDef  USER_Driver =
-{
-  USER_initialize,
-  USER_status,
-  USER_read,
-#if  _USE_WRITE
-  USER_write,
-#endif  /* _USE_WRITE == 1 */
-#if  _USE_IOCTL == 1
-  USER_ioctl,
+Diskio_drvTypeDef USER_Driver =
+    {
+        USER_initialize,
+        USER_status,
+        USER_read,
+#if _USE_WRITE
+        USER_write,
+#endif /* _USE_WRITE == 1 */
+#if _USE_IOCTL == 1
+        USER_ioctl,
 #endif /* _USE_IOCTL == 1 */
 };
 
 /* Private functions ---------------------------------------------------------*/
 
 /**
-  * @brief  Initializes a Drive
-  * @param  pdrv: Physical drive number (0..)
-  * @retval DSTATUS: Operation status
-  */
-DSTATUS USER_initialize (
-	BYTE pdrv           /* Physical drive nmuber to identify the drive */
+ * @brief  Initializes a Drive
+ * @param  pdrv: Physical drive number (0..)
+ * @retval DSTATUS: Operation status
+ */
+DSTATUS USER_initialize(
+    BYTE pdrv /* Physical drive nmuber to identify the drive */
 )
 {
-  /* USER CODE BEGIN INIT */
-    Stat = STA_NOINIT;
+    /* USER CODE BEGIN INIT */
+    switch (QspiFlash->init_ok) {
+        case true:
+            Stat = RES_OK;
+            break;
+
+        default:
+            Stat = STA_NOINIT;
+            break;
+    }
     return Stat;
-  /* USER CODE END INIT */
+    /* USER CODE END INIT */
 }
 
 /**
-  * @brief  Gets Disk Status
-  * @param  pdrv: Physical drive number (0..)
-  * @retval DSTATUS: Operation status
-  */
-DSTATUS USER_status (
-	BYTE pdrv       /* Physical drive number to identify the drive */
+ * @brief  Gets Disk Status
+ * @param  pdrv: Physical drive number (0..)
+ * @retval DSTATUS: Operation status
+ */
+DSTATUS USER_status(
+    BYTE pdrv /* Physical drive number to identify the drive */
 )
 {
-  /* USER CODE BEGIN STATUS */
-    Stat = STA_NOINIT;
+    /* USER CODE BEGIN STATUS */
+    switch (QspiFlash->init_ok) {
+        case true:
+            Stat = RES_OK;
+            break;
+
+        default:
+            Stat = STA_NOINIT;
+            break;
+    }
     return Stat;
-  /* USER CODE END STATUS */
+    /* USER CODE END STATUS */
 }
 
 /**
-  * @brief  Reads Sector(s)
-  * @param  pdrv: Physical drive number (0..)
-  * @param  *buff: Data buffer to store read data
-  * @param  sector: Sector address (LBA)
-  * @param  count: Number of sectors to read (1..128)
-  * @retval DRESULT: Operation result
-  */
-DRESULT USER_read (
-	BYTE pdrv,      /* Physical drive nmuber to identify the drive */
-	BYTE *buff,     /* Data buffer to store read data */
-	DWORD sector,   /* Sector address in LBA */
-	UINT count      /* Number of sectors to read */
+ * @brief  Reads Sector(s)
+ * @param  pdrv: Physical drive number (0..)
+ * @param  *buff: Data buffer to store read data
+ * @param  sector: Sector address (LBA)
+ * @param  count: Number of sectors to read (1..128)
+ * @retval DRESULT: Operation result
+ */
+DRESULT USER_read(
+    BYTE pdrv,    /* Physical drive nmuber to identify the drive */
+    BYTE *buff,   /* Data buffer to store read data */
+    DWORD sector, /* Sector address in LBA */
+    UINT count    /* Number of sectors to read */
 )
 {
-  /* USER CODE BEGIN READ */
+    /* USER CODE BEGIN READ */
     sfud_err sfud_result;
     DRESULT result;
     sfud_result = sfud_read(QspiFlash, sector * QspiFlash->chip.erase_gran, count * QspiFlash->chip.erase_gran, buff);
@@ -133,26 +149,26 @@ DRESULT USER_read (
     }
 
     return result;
-  /* USER CODE END READ */
+    /* USER CODE END READ */
 }
 
 /**
-  * @brief  Writes Sector(s)
-  * @param  pdrv: Physical drive number (0..)
-  * @param  *buff: Data to be written
-  * @param  sector: Sector address (LBA)
-  * @param  count: Number of sectors to write (1..128)
-  * @retval DRESULT: Operation result
-  */
+ * @brief  Writes Sector(s)
+ * @param  pdrv: Physical drive number (0..)
+ * @param  *buff: Data to be written
+ * @param  sector: Sector address (LBA)
+ * @param  count: Number of sectors to write (1..128)
+ * @retval DRESULT: Operation result
+ */
 #if _USE_WRITE == 1
-DRESULT USER_write (
-	BYTE pdrv,          /* Physical drive nmuber to identify the drive */
-	const BYTE *buff,   /* Data to be written */
-	DWORD sector,       /* Sector address in LBA */
-	UINT count          /* Number of sectors to write */
+DRESULT USER_write(
+    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    const BYTE *buff, /* Data to be written */
+    DWORD sector,     /* Sector address in LBA */
+    UINT count        /* Number of sectors to write */
 )
 {
-  /* USER CODE BEGIN WRITE */
+    /* USER CODE BEGIN WRITE */
     sfud_err sfud_result;
     DRESULT result;
     sfud_result = sfud_erase_write(QspiFlash, sector * QspiFlash->chip.erase_gran, count * QspiFlash->chip.erase_gran, buff);
@@ -166,40 +182,39 @@ DRESULT USER_write (
             break;
     }
     return result;
-  /* USER CODE END WRITE */
+    /* USER CODE END WRITE */
 }
 #endif /* _USE_WRITE == 1 */
 
 /**
-  * @brief  I/O control operation
-  * @param  pdrv: Physical drive number (0..)
-  * @param  cmd: Control code
-  * @param  *buff: Buffer to send/receive control data
-  * @retval DRESULT: Operation result
-  */
+ * @brief  I/O control operation
+ * @param  pdrv: Physical drive number (0..)
+ * @param  cmd: Control code
+ * @param  *buff: Buffer to send/receive control data
+ * @retval DRESULT: Operation result
+ */
 #if _USE_IOCTL == 1
-DRESULT USER_ioctl (
-	BYTE pdrv,      /* Physical drive nmuber (0..) */
-	BYTE cmd,       /* Control code */
-	void *buff      /* Buffer to send/receive control data */
+DRESULT USER_ioctl(
+    BYTE pdrv, /* Physical drive nmuber (0..) */
+    BYTE cmd,  /* Control code */
+    void *buff /* Buffer to send/receive control data */
 )
 {
-  /* USER CODE BEGIN IOCTL */
+    /* USER CODE BEGIN IOCTL */
     switch (cmd) {
         case GET_SECTOR_COUNT:
-            *(DWORD *)buff = 2048; // 总的扇区�?
+            *(DWORD *)buff = 2048;
             break;
 
         case GET_SECTOR_SIZE:
-            *(WORD *)buff = 4096; // 定义�?个扇区大小为4K
+            *(WORD *)buff = 4096;
             break;
 
         case GET_BLOCK_SIZE:
-            *(DWORD *)buff = 65536; // 定义�?个块大小�?64K
+            *(DWORD *)buff = 65536;
             break;
     }
     return RES_OK;
-  /* USER CODE END IOCTL */
+    /* USER CODE END IOCTL */
 }
 #endif /* _USE_IOCTL == 1 */
-
