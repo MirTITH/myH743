@@ -15,6 +15,7 @@
 #include "FreeRTOS_CLI.h"
 #include <stdio.h>
 #include <string.h>
+#include "ff.h"
 
 extern void vRegisterSampleCLICommands(void);
 
@@ -23,10 +24,9 @@ static char inputBuffer[configCOMMAND_INT_MAX_INPUT_SIZE] = {0};
 
 // 欢迎信息
 const char helloStr[] = "\
-FreeRTOS command server.\r\n\
-Type Help to view a list of registered commands.\r\n\
-Love from WTRobot.\r\n\
-";
+FreeRTOS command server.\n\
+Type Help to view a list of registered commands.\n\
+❤ from WTRobot.\n";
 
 inline static void CLI_GetStr(char *buffer, int size)
 {
@@ -42,9 +42,25 @@ inline static void CLI_GetStr(char *buffer, int size)
     }
 }
 
-inline static void CLI_PutStr(const char *buffer)
+inline static void CLI_PutStrAndNewLine(const char *buffer)
 {
     puts(buffer);
+}
+
+inline static void CLI_PutStr(const char *buffer)
+{
+    printf("%s", buffer);
+    fflush(stdout);
+}
+
+static void CLI_EchoNewLine(char *buffer, uint buffer_size)
+{
+    printf("\n");
+    f_getcwd(buffer, buffer_size);
+    const char END_STR[] = ">";
+    strncat(buffer, END_STR, buffer_size - strnlen(buffer, buffer_size) - 1);
+    printf("%s", buffer);
+    fflush(stdout);
 }
 
 static void CLI_ThreadEntry(void const *argument)
@@ -54,11 +70,13 @@ static void CLI_ThreadEntry(void const *argument)
     BaseType_t xReturned;
     vRegisterCustomCLICommands();
     vRegisterSampleCLICommands();
-    CLI_PutStr(helloStr);
+    CLI_PutStrAndNewLine(helloStr);
+    CLI_EchoNewLine(outputBuffer, configCOMMAND_INT_MAX_OUTPUT_SIZE);
+    outputBuffer[0] = '\0';
 
     for (;;) {
         CLI_GetStr(inputBuffer, configCOMMAND_INT_MAX_INPUT_SIZE);
-        CLI_PutStr(inputBuffer);
+        CLI_PutStrAndNewLine(inputBuffer);
 
         do {
             /* Get the next output string from the command interpreter. */
@@ -68,6 +86,9 @@ static void CLI_ThreadEntry(void const *argument)
             CLI_PutStr(outputBuffer);
             outputBuffer[0] = '\0';
         } while (xReturned != pdFALSE);
+
+        CLI_EchoNewLine(outputBuffer, configCOMMAND_INT_MAX_OUTPUT_SIZE);
+        outputBuffer[0] = '\0';
     }
 }
 

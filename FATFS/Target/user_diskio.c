@@ -43,7 +43,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;
-
+static sfud_flash *QspiFlash;
 /* USER CODE END DECL */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -82,6 +82,10 @@ DSTATUS USER_initialize (
 )
 {
   /* USER CODE BEGIN INIT */
+    sfud_init();
+
+    QspiFlash = sfud_get_device(SFUD_W25Q64_DEVICE_INDEX);
+    sfud_qspi_fast_read_enable(QspiFlash, 4);
     switch (QspiFlash->init_ok) {
         case true:
             Stat = RES_OK;

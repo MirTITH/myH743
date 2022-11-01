@@ -102,7 +102,7 @@ a table that gives information on each task in the system. */
 static const CLI_Command_Definition_t xTaskStats =
 {
 	"ps", /* The command string to type. */
-	"ps: Displays a table showing the state of each FreeRTOS task\r\n\r\n",
+	"ps: Displays a table showing the state of each FreeRTOS task\n\n",
 	prvTaskStatsCommand, /* The function to run. */
 	0 /* No parameters are expected. */
 };
@@ -113,7 +113,7 @@ time. */
 static const CLI_Command_Definition_t xThreeParameterEcho =
 {
 	"echo-3-parameters",
-	"echo-3-parameters <param1> <param2> <param3>: Expects three parameters, echos each in turn\r\n\r\n",
+	"echo-3-parameters <param1> <param2> <param3>: Expects three parameters, echos each in turn\n\n",
 	prvThreeParameterEchoCommand, /* The function to run. */
 	3 /* Three parameters are expected, which can take any value. */
 };
@@ -124,7 +124,7 @@ a time. */
 static const CLI_Command_Definition_t xParameterEcho =
 {
 	"echo-parameters",
-	"echo-parameters <...>: Take variable number of parameters, echos each in turn\r\n\r\n",
+	"echo-parameters <...>: Take variable number of parameters, echos each in turn\n\n",
 	prvParameterEchoCommand, /* The function to run. */
 	-1 /* The user can enter any number of commands. */
 };
@@ -135,14 +135,14 @@ static const CLI_Command_Definition_t xParameterEcho =
 	static const CLI_Command_Definition_t xRunTimeStats =
 	{
 		"run-time-stats", /* The command string to type. */
-		"run-time-stats: Displays a table showing how much processing time each FreeRTOS task has used\r\n\r\n",
+		"run-time-stats: Displays a table showing how much processing time each FreeRTOS task has used\n\n",
 		prvRunTimeStatsCommand, /* The function to run. */
 		0 /* No parameters are expected. */
 	};
 	static const CLI_Command_Definition_t xTop =
 	{
 		"top", /* The command string to type. */
-		"top: same as 'run-time-stats'\r\n\r\n",
+		"top: Same as 'run-time-stats'\n\n",
 		prvRunTimeStatsCommand, /* The function to run. */
 		0 /* No parameters are expected. */
 	};
@@ -153,7 +153,7 @@ static const CLI_Command_Definition_t xParameterEcho =
 	static const CLI_Command_Definition_t xQueryHeap =
 	{
 		"query-heap",
-		"query-heap: Displays the free heap space, and minimum ever free heap space.\r\n\r\n",
+		"query-heap: Displays the free heap space, and minimum ever free heap space.\n\n",
 		prvQueryHeapCommand, /* The function to run. */
 		0 /* The user can enter any number of commands. */
 	};
@@ -165,7 +165,7 @@ static const CLI_Command_Definition_t xParameterEcho =
 	static const CLI_Command_Definition_t xStartStopTrace =
 	{
 		"trace",
-		"trace [start | stop]:\r\n Starts or stops a trace recording for viewing in FreeRTOS+Trace\r\n\r\n",
+		"trace [start | stop]: Starts or stops a trace recording for viewing in FreeRTOS+Trace\n\n",
 		prvStartStopTraceCommand, /* The function to run. */
 		1 /* One parameter is expected.  Valid values are "start" and "stop". */
 	};
@@ -206,7 +206,7 @@ void vRegisterSampleCLICommands( void )
 
 static BaseType_t prvTaskStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 {
-const char *const pcHeader = "     State   Priority  Stack    #\r\n************************************************\r\n";
+const char *const pcHeader = "     State   Priority  Stack    #\n************************************************\n";
 BaseType_t xSpacePadding;
 
 	/* Remove compile time warnings about unused parameters, and check the
@@ -252,7 +252,7 @@ BaseType_t xSpacePadding;
 		( void ) xWriteBufferLen;
 		configASSERT( pcWriteBuffer );
 
-		sprintf( pcWriteBuffer, "Current free heap %d bytes, minimum ever free heap %d bytes\r\n", ( int ) xPortGetFreeHeapSize(), ( int ) xPortGetMinimumEverFreeHeapSize() );
+		sprintf( pcWriteBuffer, "Current free heap %d bytes, minimum ever free heap %d bytes\n", ( int ) xPortGetFreeHeapSize(), ( int ) xPortGetMinimumEverFreeHeapSize() );
 
 		/* There is no more data to return after this single string, so return
 		pdFALSE. */
@@ -266,7 +266,7 @@ BaseType_t xSpacePadding;
 	
 	static BaseType_t prvRunTimeStatsCommand( char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString )
 	{
-	const char * const pcHeader = "  Abs Time      % Time\r\n****************************************\r\n";
+	const char * const pcHeader = "  Abs Time      % Time\n****************************************\n";
 	BaseType_t xSpacePadding;
 
 		/* Remove compile time warnings about unused parameters, and check the
@@ -322,7 +322,7 @@ static UBaseType_t uxParameterNumber = 0;
 	{
 		/* The first time the function is called after the command has been
 		entered just a header string is returned. */
-		sprintf( pcWriteBuffer, "The three parameters were:\r\n" );
+		sprintf( pcWriteBuffer, "The three parameters were:\n" );
 
 		/* Next time the function is called the first parameter will be echoed
 		back. */
@@ -349,7 +349,7 @@ static UBaseType_t uxParameterNumber = 0;
 		memset( pcWriteBuffer, 0x00, xWriteBufferLen );
 		sprintf( pcWriteBuffer, "%d: ", ( int ) uxParameterNumber );
 		strncat( pcWriteBuffer, pcParameter, ( size_t )configCOMMAND_INT_MAX_OUTPUT_SIZE - xParameterStringLength - 1 );
-		strncat( pcWriteBuffer, "\r\n",configCOMMAND_INT_MAX_OUTPUT_SIZE - strlen( "\r\n" ) - 1);
+		strncat( pcWriteBuffer, "\n",configCOMMAND_INT_MAX_OUTPUT_SIZE - strlen( "\n" ) - 1);
 
 		/* If this is the last of the three parameters then there are no more
 		strings to return after this one. */
@@ -389,7 +389,7 @@ static UBaseType_t uxParameterNumber = 0;
 	{
 		/* The first time the function is called after the command has been
 		entered just a header string is returned. */
-		sprintf( pcWriteBuffer, "The parameters were:\r\n" );
+		sprintf( pcWriteBuffer, "The parameters were:\n" );
 
 		/* Next time the function is called the first parameter will be echoed
 		back. */
@@ -415,7 +415,7 @@ static UBaseType_t uxParameterNumber = 0;
 			memset( pcWriteBuffer, 0x00, xWriteBufferLen );
 			sprintf( pcWriteBuffer, "%d: ", ( int ) uxParameterNumber );
 			strncat( pcWriteBuffer, ( char * ) pcParameter, ( size_t )configCOMMAND_INT_MAX_OUTPUT_SIZE -  xParameterStringLength - 1);
-			strncat( pcWriteBuffer, "\r\n", configCOMMAND_INT_MAX_OUTPUT_SIZE - strlen( "\r\n" ) - 1);
+			strncat( pcWriteBuffer, "\n", configCOMMAND_INT_MAX_OUTPUT_SIZE - strlen( "\n" ) - 1);
 
 			/* There might be more parameters to return after this one. */
 			xReturn = pdTRUE;
@@ -472,17 +472,17 @@ static UBaseType_t uxParameterNumber = 0;
 			vTraceClear();
 			vTraceStart();
 
-			sprintf( pcWriteBuffer, "Trace recording (re)started.\r\n" );
+			sprintf( pcWriteBuffer, "Trace recording (re)started.\n" );
 		}
 		else if( strncmp( pcParameter, "stop", strlen( "stop" ) ) == 0 )
 		{
 			/* End the trace, if one is running. */
 			vTraceStop();
-			sprintf( pcWriteBuffer, "Stopping trace recording.\r\n" );
+			sprintf( pcWriteBuffer, "Stopping trace recording.\n" );
 		}
 		else
 		{
-			sprintf( pcWriteBuffer, "Valid parameters are 'start' and 'stop'.\r\n" );
+			sprintf( pcWriteBuffer, "Valid parameters are 'start' and 'stop'.\n" );
 		}
 
 		/* There is no more data to return after this single string, so return

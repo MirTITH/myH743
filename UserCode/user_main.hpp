@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #include "sfud.h"
-extern sfud_flash *QspiFlash;
 
 void StartDefaultTask(void const *argument);
 
