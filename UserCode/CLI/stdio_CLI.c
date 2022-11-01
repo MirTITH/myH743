@@ -15,7 +15,7 @@
 #include "FreeRTOS_CLI.h"
 #include <stdio.h>
 #include <string.h>
-#include "ff.h"
+// #include "ff.h"
 
 extern void vRegisterSampleCLICommands(void);
 
@@ -56,7 +56,7 @@ inline static void CLI_PutStr(const char *buffer)
 static void CLI_EchoNewLine(char *buffer, uint buffer_size)
 {
     printf("\n");
-    f_getcwd(buffer, buffer_size);
+    // f_getcwd(buffer, buffer_size);
     const char END_STR[] = ">";
     strncat(buffer, END_STR, buffer_size - strnlen(buffer, buffer_size) - 1);
     printf("%s", buffer);

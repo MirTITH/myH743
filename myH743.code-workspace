@@ -64,7 +64,8 @@
             "limits": "cpp",
             "typeinfo": "cpp",
             "chrono": "c",
-            "forward_list": "c"
+            "forward_list": "c",
+            "valarray": "c"
         },
         "[yaml]": {
             "editor.insertSpaces": true,
