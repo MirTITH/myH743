@@ -23,60 +23,13 @@
 #include "main.h"
 #include "lcd_io_gpio16.h"
 
-//========================================================================//
-//LCD commands
-
-#define   SET_COL_ADDRESS                 0x2AU
-#define   SET_PAGE_ADDRESS                0x2BU
-#define   WRITE_MEMORY_START              0x2CU
-#define   WRITE_MEMORY_CONTINUE           0x3CU
-#define   SET_DISPLAY_OFF                 0x28U
-#define   SET_DISPLAY_ON                  0x29U
-#define   SET_ADDRESS_MODE                0x36U
-#define   EXIT_INVERT_MODE                0x20U
-#define   ENTER_INVERT_MODE               0x21U
-#define   ENTER_NORMAL_MODE               0x13U //0 param
-#define   EXIT_SLEEP_MODE                 0x11U
-#define   SET_TEAR_OFF                    0x34U //0 param
-#define   SET_TEAR_ON                     0x35U //1 param
-#define   SET_PIXEL_FORMAT                0x3AU
-#define   SET_TEAR_SCANLINE               0x44U //2 param
-#define   FRAME_MEMORY_ACCESS_SETTING     0xB3U //4 param
-#define   SET_DISPLAY_MODE                0xB4U //1 param
-#define   PANEL_DRIVE_SETTING             0xC0U //6 param
-#define   TIMING_SETTING_NORMAL           0xC1U //3 param
-#define   TIMING_SETTING_PARTIAL          0xC2U //3 param
-#define   FRAME_RATE_CONTROL              0xC5U //1 param
-#define   INTERFACE_CONTROL               0xC6U //1 param
-#define   POWER_SETTING                   0xD0U //3 param
-#define   VCOM_CONTROL                    0xD1U //3 param
-#define   POWER_SETTING_NORMAL            0xD2U //2 param
-#define   POWER_SETTING_PARTIAL           0xD3U //2 param
-#define   GAMMA_SETTING                   0xC8U //12 param
-
-#define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; } //swaps two 16 bit values
-
-//========================================================================//
-//RGB565 color values
-
-#define DISABLED_FG 0xEF3C
-#define DISABLED_BG 0xCE59
-
-//========================================================================//
-//LCD class
-
-static const int Width = 320; //constants
-static const int Height = 480;
-static const uint32_t PORT_MASK = 0x1U;
-
 class LCD_ILI9481 {
   private:
-    uint8_t _CS_PIN_LCD, _RST_PIN_LCD, _DC_PIN_LCD, _WR_PIN_LCD;
-    uint8_t _PD0, _PD1, _PD2, _PD3, _PD4, _PD5, _PD6, _PD7;
-    // uint8_t _PD8, _PD9, _PD10, _PD11, _PD12, _PD13, _PD14, _PD15;
-    // uint8_t dataPins [] = {PD0, PD1, PD2, PD3, PD4, PD5, PD6, PD7};
     uint8_t _bus_width;
     uint8_t _rotation;
+
+    const int Width = 480; // Physical width
+    const int Height = 320; // Physical height
 
     void delay(uint32_t delay_ms);
 
@@ -86,8 +39,7 @@ class LCD_ILI9481 {
 
     //------------------------------------------------------------------------//
 
-    LCD_ILI9481 (uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
-                 uint8_t, uint8_t, uint8_t, uint8_t, uint8_t); //for 8-bit interface (total 12 pins)
+    LCD_ILI9481 (); //for 8-bit interface (total 12 pins)
     void initializeDisplay (void); //resets the display
     void startDisplay (void); //update config registers with default values
     void setRotation (int); //set rotation of the screen
@@ -101,7 +53,6 @@ class LCD_ILI9481 {
     void writeCommand (uint8_t); //writes 8-bit command to bus
     void writeData16 (uint16_t); //writes 16-bit data to 8-bit bus
     void writeData8 (uint8_t); //writes any 8-bit data to 8-bit bus
-    void writeToPins (uint32_t);
     void setAddrWindow (int, int, int, int); //opens a custom pixel window with X1, Y1, X2, Y2
     void fillScreen (uint16_t); //fills the entire screen with a 16-bit color
     void drawPixel (int, int, uint16_t); //updates the color of a single pixel

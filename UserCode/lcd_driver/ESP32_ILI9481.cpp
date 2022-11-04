@@ -23,6 +23,48 @@
 #include "ESP32_ILI9481.h"
 
 //========================================================================//
+//LCD commands
+
+#define   SET_COL_ADDRESS                 0x2AU
+#define   SET_PAGE_ADDRESS                0x2BU
+#define   WRITE_MEMORY_START              0x2CU
+#define   WRITE_MEMORY_CONTINUE           0x3CU
+#define   SET_DISPLAY_OFF                 0x28U
+#define   SET_DISPLAY_ON                  0x29U
+#define   SET_ADDRESS_MODE                0x36U
+#define   EXIT_INVERT_MODE                0x20U
+#define   ENTER_INVERT_MODE               0x21U
+#define   ENTER_NORMAL_MODE               0x13U //0 param
+#define   EXIT_SLEEP_MODE                 0x11U
+#define   SET_TEAR_OFF                    0x34U //0 param
+#define   SET_TEAR_ON                     0x35U //1 param
+#define   SET_PIXEL_FORMAT                0x3AU
+#define   SET_TEAR_SCANLINE               0x44U //2 param
+#define   FRAME_MEMORY_ACCESS_SETTING     0xB3U //4 param
+#define   SET_DISPLAY_MODE                0xB4U //1 param
+#define   PANEL_DRIVE_SETTING             0xC0U //6 param
+#define   TIMING_SETTING_NORMAL           0xC1U //3 param
+#define   TIMING_SETTING_PARTIAL          0xC2U //3 param
+#define   FRAME_RATE_CONTROL              0xC5U //1 param
+#define   INTERFACE_CONTROL               0xC6U //1 param
+#define   POWER_SETTING                   0xD0U //3 param
+#define   VCOM_CONTROL                    0xD1U //3 param
+#define   POWER_SETTING_NORMAL            0xD2U //2 param
+#define   POWER_SETTING_PARTIAL           0xD3U //2 param
+#define   GAMMA_SETTING                   0xC8U //12 param
+
+#define _swap_int16_t(a, b) { int16_t t = a; a = b; b = t; } //swaps two 16 bit values
+
+//========================================================================//
+//RGB565 color values
+
+#define DISABLED_FG 0xEF3C
+#define DISABLED_BG 0xCE59
+
+//========================================================================//
+//LCD class
+
+//========================================================================//
 //parallel data pins for ILI9481 display (recommended)
 //below pins are  for DOIT DevKit board version 1
 //pin numbers are of digital pins
@@ -45,54 +87,15 @@
 //========================================================================//
 //LCD functions
 
-LCD_ILI9481::LCD_ILI9481 (uint8_t a, uint8_t b, uint8_t c, uint8_t d, uint8_t e, uint8_t f, uint8_t g, uint8_t h,
-                          uint8_t i, uint8_t j, uint8_t k, uint8_t l) {
-  _PD0 = a;
-  _PD1 = b;
-  _PD2 = c;
-  _PD3 = d;
-  _PD4 = e;
-  _PD5 = f;
-  _PD6 = g;
-  _PD7 = h;
-  _CS_PIN_LCD = i;
-  _RST_PIN_LCD = j;
-  _DC_PIN_LCD = k;
-  _WR_PIN_LCD = l;
-  _bus_width = 8;
+LCD_ILI9481::LCD_ILI9481 () {
 }
 
 //------------------------------------------------------------------------//
 //initializes the display with proper reset sequence
 
 void LCD_ILI9481::initializeDisplay() {
-  //the following statement won't work on the rev 0 of ESP32 chip
-
-  // GPIO.out_w1ts = (PORT_MASK << _DC_PIN_LCD); //DC high
-  // GPIO.out_w1ts = (PORT_MASK << _CS_PIN_LCD); //CS high
-  // GPIO.out_w1ts = (PORT_MASK << _WR_PIN_LCD); //WR high
-  // GPIO.out_w1ts = (PORT_MASK << _RST_PIN_LCD); //RST high
-  // delay(100);
-  // GPIO.out_w1tc = (PORT_MASK << _DC_PIN_LCD); //RST low
-  // delay(100);
-  // GPIO.out_w1ts = (PORT_MASK << _RST_PIN_LCD); //RST high
-  // delay(100);
-  // GPIO.out_w1tc = (PORT_MASK << _CS_PIN_LCD); //CS low
-
   LCD_IO_Init();
-  // GPIO.out |= (PORT_MASK << _DC_PIN_LCD); //DC high
-  // GPIO.out |= (PORT_MASK << _CS_PIN_LCD); //CS high
-  // GPIO.out |= (PORT_MASK << _WR_PIN_LCD); //WR high
-  // GPIO.out |= (PORT_MASK << _RST_PIN_LCD); //RST high
-  // delay(100);
-  // GPIO.out &= (~(PORT_MASK << _DC_PIN_LCD)); //RST low
-  // delay(100);
-  // GPIO.out |= (PORT_MASK << _RST_PIN_LCD); //RST high
-  // delay(100);
-  // GPIO.out &= (~(PORT_MASK << _CS_PIN_LCD)); //CS low
-
   startDisplay();
-  // Serial.println("LCD Initialized.");
 }
 
 //------------------------------------------------------------------------//
@@ -215,39 +218,6 @@ void LCD_ILI9481::writeData16 (uint16_t inputData) {
 void LCD_ILI9481::writeData8 (uint8_t inputData) {
   LCD_IO_WriteData8(inputData);
 }
-
-//------------------------------------------------------------------------//
-//writes 8-bit data to individual pins
-//LSB is ANDed with 1, and writes HIGH is the ouput is 1, LOW otherwise
-//then the data is shifted right to do this for all 8 bits
-
-// void LCD_ILI9481::writeToPins (uint32_t inputData) {
-//   ((inputData >> 0) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD0)) : (GPIO.out_w1tc = (PORT_MASK << _PD0));
-//   ((inputData >> 1) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD1)) : (GPIO.out_w1tc = (PORT_MASK << _PD1));
-//   ((inputData >> 2) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD2)) : (GPIO.out_w1tc = (PORT_MASK << _PD2));
-//   ((inputData >> 3) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD3)) : (GPIO.out_w1tc = (PORT_MASK << _PD3));
-//   ((inputData >> 4) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD4)) : (GPIO.out_w1tc = (PORT_MASK << _PD4));
-//   ((inputData >> 5) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD5)) : (GPIO.out_w1tc = (PORT_MASK << _PD5));
-//   ((inputData >> 6) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD6)) : (GPIO.out_w1tc = (PORT_MASK << _PD6));
-//   ((inputData >> 7) & 0x01) ? (GPIO.out_w1ts = (PORT_MASK << _PD7)) : (GPIO.out_w1tc = (PORT_MASK << _PD7));
-
-
-//   // ((inputData >> 0) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD0)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD0));
-//   // ((inputData >> 1) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD1)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD1));
-//   // ((inputData >> 2) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD2)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD2));
-//   // ((inputData >> 3) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD3)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD3));
-//   // ((inputData >> 4) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD4)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD4));
-//   // ((inputData >> 5) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD5)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD5));
-//   // ((inputData >> 6) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD6)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD6));
-//   // ((inputData >> 7) & 0x01) ? (GPIO.out_w1ts |= ((uint32_t)1 << _PD7)) : (GPIO.out_w1tc |= ((uint32_t)1 << _PD7));
-
-//   GPIO.out_w1tc |= (PORT_MASK << _WR_PIN_LCD); //WR low
-//   // delayMicroseconds(100);
-//   GPIO.out_w1ts |= (PORT_MASK << _WR_PIN_LCD); //WR high
-
-//   // Serial.print("F : ");
-//   // Serial.println(millis());
-// }
 
 //------------------------------------------------------------------------//
 
@@ -687,5 +657,5 @@ void LCD_ILI9481::fillTriangle (int16_t x0, int16_t y0, int16_t x1, int16_t y1, 
 
 void LCD_ILI9481::delay(uint32_t delay_ms)
 {
-  HAL_Delay(delay_ms);
+  HAL_Delay(delay_ms-1);
 }

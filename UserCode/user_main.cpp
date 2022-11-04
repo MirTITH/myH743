@@ -8,6 +8,7 @@
 #include "high_precision_time.h"
 #include "ff.h"
 #include <nlohmann/json.hpp>
+#include "ESP32_ILI9481.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -16,6 +17,8 @@ using json = nlohmann::json;
 
 // #define ReadBufferSize 40960
 // static TCHAR ReadBuffer[ReadBufferSize];
+
+LCD_ILI9481 LcdClass;
 
 static void USB_Reset()
 {
@@ -49,15 +52,14 @@ void StartDefaultTask(void const *argument)
 
     // 等待 USB 初始化完成
     osDelay(500);
-    osDelay(2000); // 使得用户有足够的时间打开 USB 串口，防止错过开头的消息。
+    // osDelay(2000); // 使得用户有足够的时间打开 USB 串口，防止错过开头的消息。
 
     CLI_Start();
 
-    // BSP_LCD_Init();
+    LcdClass.initializeDisplay();
+    LcdClass.fillScreen(0x0000);
 
     for (;;) {
-        // cout << "aaa" << endl;
-        HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         osDelay(500);
     }
 }
