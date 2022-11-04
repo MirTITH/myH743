@@ -8,6 +8,7 @@
 #include "high_precision_time.h"
 #include "ff.h"
 #include <nlohmann/json.hpp>
+#include "stm32_adafruit_lcd.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -53,8 +54,20 @@ void StartDefaultTask(void const *argument)
 
     CLI_Start();
 
+    BSP_LCD_Init();
+
     for (;;) {
-        cout << "aaa" << endl;
+        // cout << "aaa" << endl;
+        uint16_t color = 0x2233;
+        BSP_LCD_Clear(color);
+        color++;
+        for (int i = 0; i < 30; i++) {
+            for (int j = 0; j < 30; j++) {
+                cout << BSP_LCD_ReadPixel(i, j) << " ";
+            }
+            cout << endl;
+        }
+        printf("Display ID = %X\r\n", (unsigned int)BSP_LCD_ReadID());
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
         osDelay(500);
     }
