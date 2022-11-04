@@ -240,8 +240,8 @@ void LCD_ILI9481::displayOff()
 
 void LCD_ILI9481::setAddrWindow(int x0, int y0, int x1, int y1)
 {
-    x1 = (x1 >= _width) ? _width - 1 : x1;
-    y1 = (y1 >= _height) ? _height - 1 : y1;
+    // x1 = (x1 >= _width) ? _width - 1 : x1;
+    // y1 = (y1 >= _height) ? _height - 1 : y1;
     writeCommand(SET_COL_ADDRESS); // set col address - 4 param
     writeData8((x0 & 0xff00) >> 8);
     writeData8(x0 & 0xff);
@@ -336,7 +336,7 @@ void LCD_ILI9481::drawPixel(int x, int y, uint16_t color)
 
 void LCD_ILI9481::fillScreen(uint16_t color)
 {
-    setAddrWindow(0, 0, _width, _height);
+    setAddrWindow(0, 0, _width - 1, _height - 1);
     for (int i = 0; i < _height; i++) {
         for (int j = 0; j < _width; j++) {
             writeData16(color);
