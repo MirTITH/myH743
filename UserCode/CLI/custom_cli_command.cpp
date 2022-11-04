@@ -120,11 +120,33 @@ static BaseType_t SysMonitorCommand(char *pcWriteBuffer, size_t xWriteBufferLen,
     return pdFALSE;
 }
 
+#include "lcd_io_gpio16.h"
+
+static BaseType_t CMD_lcd_ad_mode(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
+{
+    (void)pcWriteBuffer;
+    (void)xWriteBufferLen;
+
+    BaseType_t xParameterStringLength;
+    auto parameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
+
+    if (parameter != nullptr) {
+        uint16_t data = atoi(parameter);
+
+        printf("Writing %x\n", data);
+
+        LCD_IO_WriteCmd8(0x36U);
+        LCD_IO_WriteData8(data);
+    }
+
+    return pdFALSE;
+}
+
 void vRegisterCustomCLICommands()
 {
     static const CLI_Command_Definition_t sys_monitor = {
-        "sys-monitor",
-        "sys-monitor: Show system info\n\n",
+        "sys_monitor",
+        "sys_monitor: Show system info\n\n",
         SysMonitorCommand,
         0};
     FreeRTOS_CLIRegisterCommand(&sys_monitor);
@@ -134,7 +156,6 @@ void vRegisterCustomCLICommands()
         "cd: Change directory\n\n",
         CMD_cd,
         -1};
-
     FreeRTOS_CLIRegisterCommand(&cd);
 
     static const CLI_Command_Definition_t ll = {
@@ -142,7 +163,6 @@ void vRegisterCustomCLICommands()
         "ll: List all items in the current directory.\n\n",
         CMD_ll,
         0};
-
     FreeRTOS_CLIRegisterCommand(&ll);
 
     static const CLI_Command_Definition_t cat = {
@@ -150,6 +170,12 @@ void vRegisterCustomCLICommands()
         "cat: List all items in the current directory.\n\n",
         CMD_cat,
         -1};
-
     FreeRTOS_CLIRegisterCommand(&cat);
+
+    static const CLI_Command_Definition_t lcd_ad_mode = {
+        "lcd_ad_mode",
+        "lcd_ad_mode: SET LCD ADDRESS MODE.\n\n",
+        CMD_lcd_ad_mode,
+        1};
+    FreeRTOS_CLIRegisterCommand(&lcd_ad_mode);
 }

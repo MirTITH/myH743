@@ -25,11 +25,8 @@
 
 class LCD_ILI9481 {
   private:
-    uint8_t _bus_width;
-    uint8_t _rotation;
-
-    const int Width = 480; // Physical width
-    const int Height = 320; // Physical height
+    const int Width = 320; // Physical width
+    const int Height = 480; // Physical height
 
     void delay(uint32_t delay_ms);
 
@@ -37,12 +34,19 @@ class LCD_ILI9481 {
     int _width = Width; //becasue we can change these later if needed
     int _height = Height; //eg. in setRotation()
 
+    enum class Rotation {
+      portrait,
+      landscape,
+      inverse_portrait,
+      inverse_landscape
+    };
+
     //------------------------------------------------------------------------//
 
     LCD_ILI9481 (); //for 8-bit interface (total 12 pins)
     void initializeDisplay (void); //resets the display
     void startDisplay (void); //update config registers with default values
-    void setRotation (int); //set rotation of the screen
+    void setRotation (Rotation); //set rotation of the screen
     void invertDisplay (bool); //inverts colors
     void displayOn (void); //turns on the display
     void displayOff (void); //turns of the display

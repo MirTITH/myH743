@@ -9,6 +9,7 @@
 #include "ff.h"
 #include <nlohmann/json.hpp>
 #include "ESP32_ILI9481.h"
+#include <stdlib.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -57,9 +58,29 @@ void StartDefaultTask(void const *argument)
     CLI_Start();
 
     LcdClass.initializeDisplay();
-    LcdClass.fillScreen(0x0000);
+
+    // LcdClass.drawRectangle(10,20,100,200,0x1234);
+
+    // LcdClass.drawPixel(310,470,0xf800);
+    uint8_t r = 0, g = 0, b = 0;
+    uint16_t color;
 
     for (;;) {
-        osDelay(500);
+
+        uint32_t start_tick = HPT_GetUs();
+        
+        for (int i = 0; i < 10; i++) {
+            r += 10;
+            g += 3;
+            b -= 7;
+            color = ((r >> (8 - 5)) << (6 + 5)) | ((g >> (8 - 6)) << (5)) | ((b >> (8 - 5)) << (0));
+            LcdClass.fillScreen(color);
+        }
+
+        uint32_t end_tick = HPT_GetUs();
+        cout << 10 * 1e6 / (end_tick - start_tick) << " fps" << endl;
+        // LcdClass.fillScreen(0xaafa);
+        // LcdClass.fillScreen(0xaaaf);
+        // osDelay(500);
     }
 }

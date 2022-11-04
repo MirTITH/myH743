@@ -97,7 +97,7 @@ void CLI_Start(void)
     osThreadDef_t cliThreadDef = {
         .name = (char *)"CLI",
         .pthread = CLI_ThreadEntry,
-        .tpriority = osPriorityBelowNormal,
+        .tpriority = osPriorityNormal,
         .instances = 0,
         .stacksize = 512,
         .buffer = NULL,
