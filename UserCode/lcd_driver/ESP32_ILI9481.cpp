@@ -183,9 +183,7 @@ void LCD_ILI9481::startDisplay()
 
     writeCommand(ENTER_NORMAL_MODE); // eneter normal mode - no param
 
-    // setAddrWindow(0, 0, _width, _height);
-
-    writeCommand(SET_DISPLAY_ON); // set display on
+    displayOn();
     delay(120);
 }
 
@@ -225,6 +223,7 @@ void LCD_ILI9481::writeData8(uint8_t inputData)
 
 void LCD_ILI9481::displayOn()
 {
+    LCD_IO_Bl_OnOff(true);
     writeCommand(SET_DISPLAY_ON); // set display on
 }
 
@@ -232,6 +231,7 @@ void LCD_ILI9481::displayOn()
 
 void LCD_ILI9481::displayOff()
 {
+    LCD_IO_Bl_OnOff(false);
     writeCommand(SET_DISPLAY_OFF); // set display off
 }
 
