@@ -8,16 +8,11 @@
 #include "high_precision_time.h"
 #include "ff.h"
 #include <nlohmann/json.hpp>
-#include "ESP32_ILI9481.h"
+#include "STM32_ILI9481.hpp"
 #include <stdlib.h>
 
 using namespace std;
 using json = nlohmann::json;
-
-// static FATFS fs;
-
-// #define ReadBufferSize 40960
-// static TCHAR ReadBuffer[ReadBufferSize];
 
 LCD_ILI9481 LcdClass;
 
@@ -42,6 +37,29 @@ static void USB_Reset()
     HAL_Delay(65);
 }
 
+void TestThread(void const *argument)
+{
+    (void)argument;
+
+    int intensity = 0;
+    int delta_intensity = 1;
+
+    for (;;) {
+        intensity += delta_intensity;
+        if (intensity >= 1000) {
+            delta_intensity = -1;
+        }
+
+        if (intensity <= 0) {
+            delta_intensity = 1;
+        }
+
+        LcdClass.lcd.SetBacklight(intensity);
+
+        osDelay(1);
+    }
+}
+
 void StartDefaultTask(void const *argument)
 {
     (void)argument;
@@ -53,34 +71,38 @@ void StartDefaultTask(void const *argument)
 
     // 等待 USB 初始化完成
     osDelay(500);
-    // osDelay(2000); // 使得用户有足够的时间打开 USB 串口，防止错过开头的消息。
+    osDelay(2000); // 使得用户有足够的时间打开 USB 串口，防止错过开头的消息。
 
     CLI_Start();
 
     LcdClass.initializeDisplay();
 
-    // LcdClass.drawRectangle(10,20,100,200,0x1234);
+    osThreadDef_t test_thread_def = {
+        .name = (char *)"test_thread",
+        .pthread = TestThread,
+        .tpriority = osPriorityNormal,
+        .instances = 0,
+        .stacksize = 512,
+        .buffer = NULL,
+        .controlblock = NULL};
 
-    // LcdClass.drawPixel(310,470,0xf800);
+    osThreadCreate(&test_thread_def, NULL);
+
     uint8_t r = 0, g = 0, b = 0;
     uint16_t color;
 
     for (;;) {
-
         uint32_t start_tick = HPT_GetUs();
-        
-        for (int i = 0; i < 10; i++) {
-            r += 10;
-            g += 3;
-            b -= 7;
-            color = ((r >> (8 - 5)) << (6 + 5)) | ((g >> (8 - 6)) << (5)) | ((b >> (8 - 5)) << (0));
-            LcdClass.fillScreen(color);
-        }
+
+        r += 3;
+        g += 2;
+        b -= 2;
+        color = ((r >> (8 - 5)) << (6 + 5)) | ((g >> (8 - 6)) << (5)) | ((b >> (8 - 5)) << (0));
+        LcdClass.fillScreen(0xffff);
 
         uint32_t end_tick = HPT_GetUs();
-        cout << 10 * 1e6 / (end_tick - start_tick) << " fps" << endl;
-        // LcdClass.fillScreen(0xaafa);
-        // LcdClass.fillScreen(0xaaaf);
-        // osDelay(500);
+        cout << 1e6 / (end_tick - start_tick) << " fps" << endl;
+
+        osDelay(1);
     }
 }

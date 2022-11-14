@@ -1,30 +1,20 @@
+/**
+ * @file ESP32_ILI9481.cpp
+ * @author X. Y.  
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-13
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
 
-//========================================================================//
-//                                                                        //
-//  ## ESP32-ILI9481-LCD-Library ##                                       //
-//  ILI9481 320 x 480 LCD driver and graphics library for ESP32 boards    //
-//                                                                        //
-//  Filename : ESP32_ILI9481.cpp                                          //
-//  Description : Part of ILI9481 TFT LCD library.                        //
-//  Library version : 2.7                                                 //
-//  Author : Vishnu M Aiea                                                //
-//  Source : https://github.com/vishnumaiea/ESP32-ILI9481-LCD-Library     //
-//  Author's website : www.vishnumaiea.in                                 //
-//  Initial release : IST 11:51 PM 07-04-2018, Saturday                   //
-//  License : MIT                                                         //
-//  Additional source license/s :                                         //
-//    1. BSD license @ Adafruit Industries                                //
-//       https://github.com/adafruit/Adafruit-GFX-Library                 //
-//                                                                        //
-//  File last modified : +05:30 12:43:23 PM, 12-05-2018, Saturday         //
-//                                                                        //
-//========================================================================//
-
-#include "ESP32_ILI9481.h"
+#include "STM32_ILI9481.hpp"
 
 //========================================================================//
 // LCD commands
 
+#define SOFT_RESET                  0x01U
 #define SET_COL_ADDRESS             0x2AU
 #define SET_PAGE_ADDRESS            0x2BU
 #define WRITE_MEMORY_START          0x2CU
@@ -67,29 +57,6 @@
 #define DISABLED_BG 0xCE59
 
 //========================================================================//
-// LCD class
-
-//========================================================================//
-// parallel data pins for ILI9481 display (recommended)
-// below pins are  for DOIT DevKit board version 1
-// pin numbers are of digital pins
-// note : pins for ESP32 Devkit and Node32S are different
-
-// #define CS_PIN_LCD  26
-// #define RST_PIN_LCD 12
-// #define DC_PIN_LCD  14
-// #define WR_PIN_LCD  27
-//
-// #define PD0   15    //DB8  - D15
-// #define PD1   2     //DB9  - D2
-// #define PD2   0     //DB10 - D0
-// #define PD3   4     //DB11 - D4
-// #define PD4   16    //DB12 - D16
-// #define PD5   17    //DB13 - D17
-// #define PD6   21    //DB14 - D21
-// #define PD7   22    //DB15 - D22
-
-//========================================================================//
 // LCD functions
 
 LCD_ILI9481::LCD_ILI9481()
@@ -101,7 +68,7 @@ LCD_ILI9481::LCD_ILI9481()
 
 void LCD_ILI9481::initializeDisplay()
 {
-    LCD_IO_Init();
+    lcd.Init();
     startDisplay();
 }
 
@@ -110,8 +77,11 @@ void LCD_ILI9481::initializeDisplay()
 
 void LCD_ILI9481::startDisplay()
 {
+    writeCommand(SOFT_RESET);
+    delay(100);
+
     writeCommand(EXIT_SLEEP_MODE); // exit sleep mode
-    delay(80);
+    delay(100);
 
     writeCommand(POWER_SETTING); // power setting
     writeData8(0x07U);
@@ -147,7 +117,7 @@ void LCD_ILI9481::startDisplay()
      * 0x06:  45
      * 0x07:  42
      */
-    writeData8(0x03);
+    writeData8(0x05);
 
     // writeCommand(FRAME_MEMORY_ACCESS_SETTING); //frame memeory access and interface setting
     //   writeData8(0x0U); //extra data is ignored
@@ -192,7 +162,8 @@ void LCD_ILI9481::startDisplay()
 
 void LCD_ILI9481::writeData(uint8_t inputData)
 {
-    LCD_IO_WriteData8(inputData);
+    lcd.WriteData8(inputData);
+    // LCD_IO_WriteData8(inputData);
 }
 
 //------------------------------------------------------------------------//
@@ -200,7 +171,8 @@ void LCD_ILI9481::writeData(uint8_t inputData)
 
 void LCD_ILI9481::writeCommand(uint8_t inputCommand)
 {
-    LCD_IO_WriteCmd8(inputCommand);
+    lcd.WriteCmd8(inputCommand);
+    // LCD_IO_WriteCmd8(inputCommand);
 }
 
 //------------------------------------------------------------------------//
@@ -208,7 +180,8 @@ void LCD_ILI9481::writeCommand(uint8_t inputCommand)
 
 void LCD_ILI9481::writeData16(uint16_t inputData)
 {
-    LCD_IO_WriteData16(inputData);
+    lcd.WriteData16(inputData);
+    // LCD_IO_WriteData16(inputData);
 }
 
 //------------------------------------------------------------------------//
@@ -216,14 +189,14 @@ void LCD_ILI9481::writeData16(uint16_t inputData)
 
 void LCD_ILI9481::writeData8(uint8_t inputData)
 {
-    LCD_IO_WriteData8(inputData);
+    lcd.WriteData8(inputData);
+    // LCD_IO_WriteData8(inputData);
 }
 
 //------------------------------------------------------------------------//
 
 void LCD_ILI9481::displayOn()
 {
-    LCD_IO_Bl_OnOff(true);
     writeCommand(SET_DISPLAY_ON); // set display on
 }
 
@@ -231,7 +204,6 @@ void LCD_ILI9481::displayOn()
 
 void LCD_ILI9481::displayOff()
 {
-    LCD_IO_Bl_OnOff(false);
     writeCommand(SET_DISPLAY_OFF); // set display off
 }
 

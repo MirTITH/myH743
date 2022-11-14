@@ -120,7 +120,7 @@ static BaseType_t SysMonitorCommand(char *pcWriteBuffer, size_t xWriteBufferLen,
     return pdFALSE;
 }
 
-#include "lcd_io_gpio16.h"
+#include "lcd_io_fmc.hpp"
 
 static BaseType_t CMD_lcd_ad_mode(char *pcWriteBuffer, size_t xWriteBufferLen, const char *pcCommandString)
 {
@@ -131,12 +131,13 @@ static BaseType_t CMD_lcd_ad_mode(char *pcWriteBuffer, size_t xWriteBufferLen, c
     auto parameter = FreeRTOS_CLIGetParameter(pcCommandString, 1, &xParameterStringLength);
 
     if (parameter != nullptr) {
+        LcdIoFmc lcd;
         uint16_t data = atoi(parameter);
 
         printf("Writing %x\n", data);
 
-        LCD_IO_WriteCmd8(0x36U);
-        LCD_IO_WriteData8(data);
+        lcd.WriteCmd8(0x36U);
+        lcd.WriteData8(data);
     }
 
     return pdFALSE;
