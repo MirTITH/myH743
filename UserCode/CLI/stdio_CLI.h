@@ -14,8 +14,6 @@
 extern "C" {
 #endif
 
-#include "usart.h"
-
 #define configCOMMAND_INT_MAX_OUTPUT_SIZE 512
 #define configCOMMAND_INT_MAX_INPUT_SIZE 128
 

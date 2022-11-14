@@ -88,20 +88,13 @@ void StartDefaultTask(void const *argument)
 
     osThreadCreate(&test_thread_def, NULL);
 
-    uint8_t r = 0, g = 0, b = 0;
-    uint16_t color;
-
     for (;;) {
-        uint32_t start_tick = HPT_GetUs();
+        int leftA = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
+        int leftB = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1);
+        int leftButton = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_6);
 
-        r += 3;
-        g += 2;
-        b -= 2;
-        color = ((r >> (8 - 5)) << (6 + 5)) | ((g >> (8 - 6)) << (5)) | ((b >> (8 - 5)) << (0));
-        LcdClass.fillScreen(0xffff);
-
-        uint32_t end_tick = HPT_GetUs();
-        cout << 1e6 / (end_tick - start_tick) << " fps" << endl;
+        cout << leftA << ' ' << leftB << ' ' << leftButton;
+        cout << endl;
 
         osDelay(1);
     }

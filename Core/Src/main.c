@@ -21,13 +21,9 @@
 #include "cmsis_os.h"
 #include "adc.h"
 #include "fatfs.h"
-#include "i2c.h"
-#include "i2s.h"
 #include "quadspi.h"
 #include "rtc.h"
-#include "spi.h"
 #include "tim.h"
-#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 #include "fmc.h"
@@ -112,13 +108,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_RTC_Init();
-  MX_USART1_UART_Init();
-  MX_ADC1_Init();
-  MX_ADC2_Init();
-  MX_I2C1_Init();
-  MX_I2S3_Init();
   MX_QUADSPI_Init();
-  MX_SPI1_Init();
   MX_ADC3_Init();
   MX_FATFS_Init();
   MX_FMC_Init();

@@ -57,8 +57,20 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LED_Pin GPIO_PIN_1
-#define LED_GPIO_Port GPIOA
+#define LKnobButton_Pin GPIO_PIN_6
+#define LKnobButton_GPIO_Port GPIOE
+#define LcdReset_Pin GPIO_PIN_1
+#define LcdReset_GPIO_Port GPIOA
+#define RKnobButton_Pin GPIO_PIN_15
+#define RKnobButton_GPIO_Port GPIOA
+#define RKnobA_Pin GPIO_PIN_4
+#define RKnobA_GPIO_Port GPIOB
+#define LKnobA_Pin GPIO_PIN_9
+#define LKnobA_GPIO_Port GPIOB
+#define RKnobB_Pin GPIO_PIN_0
+#define RKnobB_GPIO_Port GPIOE
+#define LKnobB_Pin GPIO_PIN_1
+#define LKnobB_GPIO_Port GPIOE
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
