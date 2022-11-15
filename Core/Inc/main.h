@@ -65,8 +65,10 @@ void Error_Handler(void);
 #define RKnobButton_GPIO_Port GPIOA
 #define RKnobA_Pin GPIO_PIN_4
 #define RKnobA_GPIO_Port GPIOB
+#define RKnobA_EXTI_IRQn EXTI4_IRQn
 #define LKnobA_Pin GPIO_PIN_9
 #define LKnobA_GPIO_Port GPIOB
+#define LKnobA_EXTI_IRQn EXTI9_5_IRQn
 #define RKnobB_Pin GPIO_PIN_0
 #define RKnobB_GPIO_Port GPIOE
 #define LKnobB_Pin GPIO_PIN_1

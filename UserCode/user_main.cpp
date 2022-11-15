@@ -10,11 +10,15 @@
 #include <nlohmann/json.hpp>
 #include "STM32_ILI9481.hpp"
 #include <stdlib.h>
+#include "knob.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 LCD_ILI9481 LcdClass;
+
+int LKnobCount = 0;
+int RKnobCount = 0;
 
 static void USB_Reset()
 {
@@ -77,6 +81,8 @@ void StartDefaultTask(void const *argument)
 
     LcdClass.initializeDisplay();
 
+    LcdClass.fillScreen(0x8977);
+
     osThreadDef_t test_thread_def = {
         .name = (char *)"test_thread",
         .pthread = TestThread,
@@ -89,11 +95,23 @@ void StartDefaultTask(void const *argument)
     osThreadCreate(&test_thread_def, NULL);
 
     for (;;) {
-        int leftA = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
-        int leftB = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_1);
-        int leftButton = HAL_GPIO_ReadPin(GPIOE, GPIO_PIN_6);
+        int leftA = HAL_GPIO_ReadPin(LKnobA_GPIO_Port, LKnobA_Pin);
+        int leftB = HAL_GPIO_ReadPin(LKnobB_GPIO_Port, LKnobB_Pin);
+        int leftButton = HAL_GPIO_ReadPin(LKnobButton_GPIO_Port, LKnobButton_Pin);
+        int rightA = HAL_GPIO_ReadPin(RKnobA_GPIO_Port, RKnobA_Pin);
+        int rightB = HAL_GPIO_ReadPin(RKnobB_GPIO_Port, RKnobB_Pin);
+        int rightButton = HAL_GPIO_ReadPin(RKnobButton_GPIO_Port, RKnobButton_Pin);
 
         cout << leftA << ' ' << leftB << ' ' << leftButton;
+        cout << '|';
+        cout << rightA << ' ' << rightB << ' ' << rightButton;
+        cout << '\t';
+        cout << "L:";
+        cout << LeftKnob.GetRotationalCount() << ' ';
+        cout << LeftKnob.IsButtonDown() << ' ';
+        cout << "R:";
+        cout << RightKnob.GetRotationalCount() << ' ';
+        cout << RightKnob.IsButtonDown() << ' ';
         cout << endl;
 
         osDelay(1);
