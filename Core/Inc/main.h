@@ -59,10 +59,22 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define LKnobButton_Pin GPIO_PIN_6
 #define LKnobButton_GPIO_Port GPIOE
+#define LJoystickX_Pin GPIO_PIN_0
+#define LJoystickX_GPIO_Port GPIOC
+#define LJoystickY_Pin GPIO_PIN_0
+#define LJoystickY_GPIO_Port GPIOA
 #define LcdReset_Pin GPIO_PIN_1
 #define LcdReset_GPIO_Port GPIOA
+#define RJoystickButton_Pin GPIO_PIN_2
+#define RJoystickButton_GPIO_Port GPIOA
+#define RJoystickY_Pin GPIO_PIN_4
+#define RJoystickY_GPIO_Port GPIOC
+#define RJoystickX_Pin GPIO_PIN_1
+#define RJoystickX_GPIO_Port GPIOB
 #define RKnobButton_Pin GPIO_PIN_15
 #define RKnobButton_GPIO_Port GPIOA
+#define LJoystickButton_Pin GPIO_PIN_3
+#define LJoystickButton_GPIO_Port GPIOD
 #define RKnobA_Pin GPIO_PIN_4
 #define RKnobA_GPIO_Port GPIOB
 #define RKnobA_EXTI_IRQn EXTI4_IRQn

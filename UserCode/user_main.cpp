@@ -11,6 +11,7 @@
 #include "STM32_ILI9481.hpp"
 #include <stdlib.h>
 #include "knob.hpp"
+#include "joystick.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -70,6 +71,7 @@ void StartDefaultTask(void const *argument)
 
     USB_Reset();
     MX_USB_DEVICE_Init();
+    Joystick_Init();
 
     FreeRTOS_IO_Init();
 
@@ -95,25 +97,28 @@ void StartDefaultTask(void const *argument)
     osThreadCreate(&test_thread_def, NULL);
 
     for (;;) {
-        int leftA = HAL_GPIO_ReadPin(LKnobA_GPIO_Port, LKnobA_Pin);
-        int leftB = HAL_GPIO_ReadPin(LKnobB_GPIO_Port, LKnobB_Pin);
-        int leftButton = HAL_GPIO_ReadPin(LKnobButton_GPIO_Port, LKnobButton_Pin);
-        int rightA = HAL_GPIO_ReadPin(RKnobA_GPIO_Port, RKnobA_Pin);
-        int rightB = HAL_GPIO_ReadPin(RKnobB_GPIO_Port, RKnobB_Pin);
-        int rightButton = HAL_GPIO_ReadPin(RKnobButton_GPIO_Port, RKnobButton_Pin);
+        // int leftA = HAL_GPIO_ReadPin(LKnobA_GPIO_Port, LKnobA_Pin);
+        // int leftB = HAL_GPIO_ReadPin(LKnobB_GPIO_Port, LKnobB_Pin);
+        // int leftButton = HAL_GPIO_ReadPin(LKnobButton_GPIO_Port, LKnobButton_Pin);
+        // int rightA = HAL_GPIO_ReadPin(RKnobA_GPIO_Port, RKnobA_Pin);
+        // int rightB = HAL_GPIO_ReadPin(RKnobB_GPIO_Port, RKnobB_Pin);
+        // int rightButton = HAL_GPIO_ReadPin(RKnobButton_GPIO_Port, RKnobButton_Pin);
+        // cout << leftA << ' ' << leftB << ' ' << leftButton;
+        // cout << '|';
+        // cout << rightA << ' ' << rightB << ' ' << rightButton;
+        // cout << '\t';
 
-        cout << leftA << ' ' << leftB << ' ' << leftButton;
-        cout << '|';
-        cout << rightA << ' ' << rightB << ' ' << rightButton;
-        cout << '\t';
-        cout << "L:";
-        cout << LeftKnob.GetRotationalCount() << ' ';
-        cout << LeftKnob.IsButtonDown() << ' ';
-        cout << "R:";
-        cout << RightKnob.GetRotationalCount() << ' ';
-        cout << RightKnob.IsButtonDown() << ' ';
+        // cout << "LKnob:";
+        // cout << LeftKnob.GetRotationalCount() << ' ';
+        // cout << LeftKnob.IsButtonDown() << ' ';
+        // cout << "RKnob:";
+        // cout << RightKnob.GetRotationalCount() << ' ';
+        // cout << RightKnob.IsButtonDown() << '\t';
+        // cout << "LJoystick:" << LeftJoystick.x << ' ' << LeftJoystick.y << '\t';
+        // cout << "RJoystick:" << RightJoystick.x << ' ' << RightJoystick.y;
+        cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << LeftJoystick.callback_period_us << ',' << RightJoystick.x << ',' << RightJoystick.y << ',' << RightJoystick.callback_period_us;
         cout << endl;
 
-        osDelay(1);
+        osDelay(50);
     }
 }
