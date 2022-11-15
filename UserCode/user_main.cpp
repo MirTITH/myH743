@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include "knob.hpp"
 #include "joystick.hpp"
+#include "cpp_adc.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -71,7 +72,8 @@ void StartDefaultTask(void const *argument)
 
     USB_Reset();
     MX_USB_DEVICE_Init();
-    Joystick_Init();
+    CppAdc1.StartDma();
+    CppAdc2.StartDma();
 
     FreeRTOS_IO_Init();
 
@@ -116,7 +118,18 @@ void StartDefaultTask(void const *argument)
         // cout << RightKnob.IsButtonDown() << '\t';
         // cout << "LJoystick:" << LeftJoystick.x << ' ' << LeftJoystick.y << '\t';
         // cout << "RJoystick:" << RightJoystick.x << ' ' << RightJoystick.y;
-        cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << LeftJoystick.callback_period_us << ',' << RightJoystick.x << ',' << RightJoystick.y << ',' << RightJoystick.callback_period_us;
+        // cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << LeftJoystick.callback_period_us << ',' << RightJoystick.x << ',' << RightJoystick.y << ',' << RightJoystick.callback_period_us;
+
+        cout << "ADC1:";
+        for (int i = 0; i < 2; i++) {
+            cout << CppAdc1.data[i] << ' ';
+        }
+        cout << endl;
+
+        cout << "ADC2:";
+        for (int i = 0; i < 2; i++) {
+            cout << CppAdc2.data[i] << ' ';
+        }
         cout << endl;
 
         osDelay(10);
