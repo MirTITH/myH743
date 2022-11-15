@@ -119,6 +119,6 @@ void StartDefaultTask(void const *argument)
         cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << LeftJoystick.callback_period_us << ',' << RightJoystick.x << ',' << RightJoystick.y << ',' << RightJoystick.callback_period_us;
         cout << endl;
 
-        osDelay(50);
+        osDelay(10);
     }
 }
