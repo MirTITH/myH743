@@ -6,10 +6,11 @@
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
-    SysMonitor::GetInstance().conv_callback(hadc);
+    // SysMonitor::GetInstance().conv_callback(hadc);
    
-    // CppAdc1.ConvCpltCallback(hadc);
-    // CppAdc2.ConvCpltCallback(hadc);
+    CppAdc1.ConvCpltCallback(hadc);
+    CppAdc2.ConvCpltCallback(hadc);
+    CppAdc3.ConvCpltCallback(hadc);
     // LeftJoystick.conv_callback(hadc);
     // RightJoystick.conv_callback(hadc);
 }

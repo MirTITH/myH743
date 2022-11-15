@@ -11,12 +11,13 @@
 
 #pragma once
 #include "main.h"
-#include "adc.h"
+#include "cpp_adc.hpp"
 #include <ostream>
 
 class SysMonitor
 {
 public:
+    bool is_inited = false;
     struct Info {
         float temperature; // 内核温度 (℃)
         float vbat;        // 电池电压 (V)
@@ -31,24 +32,27 @@ public:
         return instance;
     }
 
-    /**
-     * @brief ADC 转换完成的回调函数
-     *
-     * @param current_hadc 当前转换完成的 adc
-     */
-    void conv_callback(ADC_HandleTypeDef *current_hadc);
+    void Init()
+    {
+        if (is_inited == false) {
+            cpp_adc.StartDMA();
+        }
+        is_inited = true;
+    }
 
-    Info GetInfo() const;
+    Info GetInfo();
 
-    friend std::ostream & operator<<(std::ostream &out, SysMonitor &A);
+    void UpdateInfo();
+
+    friend std::ostream &operator<<(std::ostream &out, SysMonitor &A);
 
 private:
-    ADC_HandleTypeDef *hadc;  // 对应的 ADC
-    uint16_t circuit_vref;    // 电路上设计的参考电压值 (mV)
-    int Number_Of_Conversion; // 扫描转换的数量
-
     Info info;
-    uint8_t info_index; // 当前要接收的信息 id
+
+    CPP_ADC &cpp_adc = CppAdc3;
+    int temperature_data_index = 1;
+    int vbat_data_index = 0;
+    int vrefint_data_index = 2;
 
     /**
      * @brief 在这里修改相关参数
@@ -56,7 +60,7 @@ private:
      * @param hadc 对应的 ADC
      * @param circuit_vref 电路上设计的参考电压值 (mV)
      */
-    SysMonitor(ADC_HandleTypeDef *hadc = &hadc3, uint16_t circuit_vref = 3300);
+    SysMonitor(){};
     ~SysMonitor() = default;
     SysMonitor(const SysMonitor &) = delete;
     SysMonitor &operator=(const SysMonitor &) = delete;

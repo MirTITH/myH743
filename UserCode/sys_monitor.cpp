@@ -10,9 +10,9 @@
  */
 
 #include "sys_monitor.hpp"
-#include "cmsis_os.h"
 #include "nameof.hpp"
 #include <string>
+#include "cmsis_os.h"
 
 #define NameAndValue(outstream, x) (outstream << NAMEOF(x) << ":" << x)
 
@@ -51,75 +51,33 @@ static float CalcTemperature(uint16_t vref, uint32_t adcValue, uint32_t adcResol
            TEMPSENSOR_CAL1_TEMP;
 }
 
-/**
- * @brief 将 ADC 的值转换为电压
- *
- * @param vref Analog reference voltage (unit: mV)
- * @param adcValue ADC conversion data of internal temperature sensor (unit: digital value)
- * @param adcResolutuion ADC resolution at which internal temperature sensor voltage has been measured.
- * @return 电压 (V)
- */
-static float CalcVoltage(uint16_t vref, uint32_t adcValue, uint32_t adcResolutuion)
+SysMonitor::Info SysMonitor::GetInfo()
 {
-    float adcValue16Bit = __LL_ADC_CONVERT_DATA_RESOLUTION(adcValue, adcResolutuion, LL_ADC_RESOLUTION_16B);
-    return adcValue16Bit * vref / (1000 * (0xffff));
-}
-
-SysMonitor::SysMonitor(ADC_HandleTypeDef *hadc, uint16_t circuit_vref)
-{
-    this->hadc = hadc;
-    this->circuit_vref = circuit_vref;
-    this->Number_Of_Conversion = hadc->Init.NbrOfConversion;
-    this->info_index = 0;
-
-    // ADC 校准
-    HAL_ADCEx_Calibration_Start(hadc, ADC_CALIB_OFFSET_LINEARITY, ADC_SINGLE_ENDED);
-    // 开始中断转换
-    HAL_ADC_Start_IT(hadc);
-}
-
-void SysMonitor::conv_callback(ADC_HandleTypeDef *current_hadc)
-{
-    if (current_hadc == hadc) {
-        uint32_t adc_value = HAL_ADC_GetValue(hadc);
-        switch (info_index) {
-            case 0:
-                info.temperature = CalcTemperature(circuit_vref, adc_value, hadc->Init.Resolution);
-                break;
-            case 1:
-                // 芯片内部有 1/4 分压，所以这里要乘以 4 才是实际电压
-                info.vbat = CalcVoltage(circuit_vref, adc_value, hadc->Init.Resolution) * 4;
-                break;
-            case 2:
-                info.vrefint = CalcVoltage(circuit_vref, adc_value, hadc->Init.Resolution);
-                break;
-            default:
-                break;
-        }
-        info_index++;
-        if (info_index >= Number_Of_Conversion) {
-            info_index = 0;
-        }
-
-        // 连续模式只需要开启一次中断转换即可,非连续转换模式每次都要重新开启
-        if (this->hadc->Init.ContinuousConvMode == FunctionalState::DISABLE) {
-            HAL_ADC_Start_IT(hadc);
-        }
-    }
-}
-
-SysMonitor::Info SysMonitor::GetInfo() const
-{
-    portENTER_CRITICAL();
-    Info temp = info;
-    portEXIT_CRITICAL();
-    return temp;
+    UpdateInfo();
+    return info;
 }
 
 std::ostream &operator<<(std::ostream &out, SysMonitor &A)
 {
-    NameAndValue(out, A.info.temperature) << std::endl;
-    NameAndValue(out, A.info.vbat) << std::endl;
-    NameAndValue(out, A.info.vrefint) << std::endl;
+    if (A.is_inited) {
+        A.UpdateInfo();
+        NameAndValue(out, A.info.temperature) << std::endl;
+        NameAndValue(out, A.info.vbat) << std::endl;
+        NameAndValue(out, A.info.vrefint) << std::endl;
+    } else {
+        out << "SysMonitor not initialized" << std::endl;
+    }
+
     return out;
+}
+
+void SysMonitor::UpdateInfo()
+{
+    portENTER_CRITICAL();
+    auto temperature_data = cpp_adc.GetChannelData(temperature_data_index);
+    info.temperature = CalcTemperature(cpp_adc.GetVref() * 1000, temperature_data, cpp_adc.GetResolution());
+    // 芯片内部有 1/4 分压，所以这里要乘以 4 才是实际电压
+    info.vbat = cpp_adc.GetChannelVoltage(vbat_data_index) * 4;
+    info.vrefint = cpp_adc.GetChannelVoltage(vrefint_data_index);
+    portEXIT_CRITICAL();
 }

@@ -110,9 +110,9 @@ static BaseType_t SysMonitorCommand(char *pcWriteBuffer, size_t xWriteBufferLen,
     (void)xWriteBufferLen;
     (void)pcCommandString;
 
-    if (SysMonitor::GetInstance().GetInfo().temperature == 0) {
+    if (SysMonitor::GetInstance().is_inited == false) {
         cout << "Starting SysMonitor..." << endl;
-        // 等待第一次转换完成
+        SysMonitor::GetInstance().Init();
         osDelay(1000);
     }
 

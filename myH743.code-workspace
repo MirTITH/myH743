@@ -73,7 +73,7 @@
             "editor.autoIndent": "advanced"
         },
         "EIDE.SerialPortMonitor.BaudRate": 115200,
-        "cortex-debug.variableUseNaturalFormat": false
+        "cortex-debug.variableUseNaturalFormat": true
     },
     "extensions": {
         "recommendations": [

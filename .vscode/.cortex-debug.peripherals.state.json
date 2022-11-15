@@ -1,1 +1,1 @@
-[{"node":"DMA1","expanded":true,"format":0,"pinned":false}]
+[{"node":"ADC1.DR","expanded":true,"format":0},{"node":"DMA1","expanded":true,"format":0,"pinned":false},{"node":"DMA1.S0FCR","expanded":true,"format":0},{"node":"DMA1.S1CR","expanded":true,"format":0},{"node":"DMA1.S1FCR","expanded":true,"format":0}]

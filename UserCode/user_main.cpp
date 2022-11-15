@@ -72,10 +72,10 @@ void StartDefaultTask(void const *argument)
 
     USB_Reset();
     MX_USB_DEVICE_Init();
-    CppAdc1.StartDma();
-    CppAdc2.StartDma();
 
     FreeRTOS_IO_Init();
+
+    Joystick_Init();
 
     // 等待 USB 初始化完成
     osDelay(500);
@@ -118,20 +118,32 @@ void StartDefaultTask(void const *argument)
         // cout << RightKnob.IsButtonDown() << '\t';
         // cout << "LJoystick:" << LeftJoystick.x << ' ' << LeftJoystick.y << '\t';
         // cout << "RJoystick:" << RightJoystick.x << ' ' << RightJoystick.y;
-        // cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << LeftJoystick.callback_period_us << ',' << RightJoystick.x << ',' << RightJoystick.y << ',' << RightJoystick.callback_period_us;
-
-        cout << "ADC1:";
-        for (int i = 0; i < 2; i++) {
-            cout << CppAdc1.data[i] << ' ';
-        }
+        LeftJoystick.Update();
+        RightJoystick.Update();
+        cout << LeftJoystick.x << ',' << LeftJoystick.y << ',' << RightJoystick.x << ',' << RightJoystick.y;
         cout << endl;
 
-        cout << "ADC2:";
-        for (int i = 0; i < 2; i++) {
-            cout << CppAdc2.data[i] << ' ';
-        }
-        cout << endl;
+        // cout << "ADC1:";
+        // for (int i = 0; i < 2; i++) {
+        //     cout << CppAdc1.GetChannelVoltage(i) << ' ';
+        // }
+        // cout << CppAdc1.callback_period_us;
+        // cout << endl;
 
-        osDelay(10);
+        // cout << "ADC2:";
+        // for (int i = 0; i < 2; i++) {
+        //     cout << CppAdc2.GetChannelVoltage(i) << ' ';
+        // }
+        // cout << CppAdc2.callback_period_us;
+        // cout << endl;
+
+        // cout << "ADC3:";
+        // for (int i = 0; i < 3; i++) {
+        //     cout << CppAdc3.GetChannelVoltage(i) << ' ';
+        // }
+        // cout << CppAdc3.callback_period_us;
+        // cout << endl;
+
+        osDelay(100);
     }
 }
